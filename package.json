@@ -1,0 +1,20 @@
+{
+  "name": "elementorify",
+  "version": "1.1.6",
+  "description": "Chrome extension to convert web page elements into Elementor widgets effortlessly",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^20.12.12",
+    "@types/webextension-polyfill": "^0.10.7",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  },
+  "dependencies": {
+    "webextension-polyfill": "^0.12.0"
+  }
+}
