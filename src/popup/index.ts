@@ -7,20 +7,42 @@ document.addEventListener('DOMContentLoaded', () => {
   const vpMobile = document.getElementById('vp-mobile');
   const elementDetails = document.getElementById('element-details');
 
-  // Trigger Inspect Element
+  async function getActiveTab(): Promise<chrome.tabs.Tab | undefined> {
+    const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    return tabs[0] || (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+  }
+
+  // Trigger Inspect Element with Script Injection Fallback
   btnInspect?.addEventListener('click', async () => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab?.id) {
-      chrome.tabs.sendMessage(tab.id, { action: 'enableCaptureData', tabId: tab.id }).catch(() => {
-        alert('Please refresh the page or make sure you are on a valid web page.');
-      });
-      window.close(); // Close popup so user can pick element
+    const tab = await getActiveTab();
+    if (!tab?.id) return;
+
+    const tabId = tab.id;
+
+    try {
+      // Send message to content script
+      await chrome.tabs.sendMessage(tabId, { action: 'enableCaptureData', tabId });
+    } catch (_err) {
+      // Fallback: If content script was not pre-injected into existing tab, inject it now!
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId },
+          files: ['content-ui/index.iife.js'],
+        });
+        // Retry sending message after injection
+        await chrome.tabs.sendMessage(tabId, { action: 'enableCaptureData', tabId });
+      } catch (injectErr) {
+        console.error('Script injection failed:', injectErr);
+        alert('Cannot inspect on this page (Chrome restricts extensions on chrome:// pages and store pages).');
+      }
+    } finally {
+      window.close(); // Close popup so inspector overlay is visible on page
     }
   });
 
   // Viewport Emulation helper
   async function setViewport(width: number, height: number) {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tab = await getActiveTab();
     if (!tab?.id) return;
 
     if (width === 0) {
