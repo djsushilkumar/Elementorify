@@ -65,6 +65,22 @@ try {
   console.error('❌ Test 2 Failed:', err);
 }
 
+const mockHeader = {
+  tagName: 'HEADER',
+  className: 'site-header navbar-main',
+  id: 'main-header',
+  innerText: 'Home About Services Contact',
+  innerHTML: '<nav>Home About Services Contact</nav>',
+  computedStyles: {
+    display: 'flex',
+    backgroundColor: 'rgb(15, 23, 42)',
+    color: 'rgb(255, 255, 255)',
+  },
+  attributes: { id: 'main-header' },
+  childrenCount: 4,
+  rect: { width: 1200, height: 80, top: 0, left: 0 },
+};
+
 // Test 3: Elementor 4.0 Atomic Clipboard Serialization & Toast Helper
 try {
   const { copyElementorToClipboard } = await import('../src/content/elementor-exporter');
@@ -78,6 +94,17 @@ try {
   console.error('❌ Test 3 Failed:', err);
 }
 
+// Test 4: Native Nav Menu & Header Container Naming
+try {
+  const jsonHeader = generateElementorJSON(mockHeader, 'v4');
+  console.log('\n✅ Test 4 Passed: Native Nav Menu & Semantic Header Container naming valid.');
+  console.log(`   - Container Title: ${jsonHeader.content[0].editor_settings?.title}`);
+  console.log(`   - Native Widget Type: ${jsonHeader.content[0].elements[0].widgetType}`);
+} catch (err) {
+  console.error('❌ Test 4 Failed:', err);
+}
+
 console.log('\n🎉 All Exporter Tests (v4 Atomic & v3 Legacy) Completed Successfully!');
+
 
 

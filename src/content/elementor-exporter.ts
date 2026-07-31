@@ -220,6 +220,77 @@ function buildIconBoxWidget(data: ElementData): ElementorWidget {
   };
 }
 
+function buildNavMenuWidget(data: ElementData): ElementorWidget {
+  return {
+    id: uid(),
+    elType: 'widget',
+    widgetType: 'nav-menu',
+    settings: cleanSettings({
+      layout: 'horizontal',
+      align_items: 'center',
+      pointer: 'underline',
+      _css_classes: data.className || '',
+      typography_font_size: { unit: 'px', size: cssUnit(data.computedStyles.fontSize) || '16' },
+      typography_font_weight: data.computedStyles.fontWeight || '500',
+      color: normalizeColor(data.computedStyles.color) || '#1e293b',
+    }),
+    elements: [],
+  };
+}
+
+function buildAccordionWidget(data: ElementData): ElementorWidget {
+  return {
+    id: uid(),
+    elType: 'widget',
+    widgetType: 'accordion',
+    settings: cleanSettings({
+      tabs: [
+        { tab_title: data.innerText.slice(0, 40) || 'FAQ Item', tab_content: data.innerText || 'Description' }
+      ],
+      _css_classes: data.className || '',
+    }),
+    elements: [],
+  };
+}
+
+function buildFormWidget(data: ElementData): ElementorWidget {
+  return {
+    id: uid(),
+    elType: 'widget',
+    widgetType: 'form',
+    settings: cleanSettings({
+      form_name: 'Contact Form',
+      form_fields: [
+        { _id: uid(), field_type: 'text', field_label: 'Name', placeholder: 'Your Name' },
+        { _id: uid(), field_type: 'email', field_label: 'Email', placeholder: 'Your Email' },
+        { _id: uid(), field_type: 'textarea', field_label: 'Message', placeholder: 'Your Message' },
+      ],
+      button_text: 'Send Message',
+      _css_classes: data.className || '',
+    }),
+    elements: [],
+  };
+}
+
+function buildImageBoxWidget(data: ElementData): ElementorWidget {
+  const rawSrc = data.attributes['src'] || '';
+  const src = makeAbsoluteURL(rawSrc);
+  return {
+    id: uid(),
+    elType: 'widget',
+    widgetType: 'image-box',
+    settings: cleanSettings({
+      image: { url: src },
+      title_text: data.innerText || 'Image Box',
+      description_text: '',
+      image_size: 'full',
+      position: 'top',
+      _css_classes: data.className || '',
+    }),
+    elements: [],
+  };
+}
+
 function buildSpacerWidget(data: ElementData): ElementorWidget {
   const height = cssUnit(data.computedStyles.height) || '50';
   return {
@@ -232,19 +303,55 @@ function buildSpacerWidget(data: ElementData): ElementorWidget {
 }
 
 // ─────────────────────────────────────────────
+// Semantic Container / Section Naming Helper
+// ─────────────────────────────────────────────
+
+function getSemanticContainerTitle(data: ElementData): string {
+  const tag = data.tagName.toUpperCase();
+  const cls = (data.className || '').toLowerCase();
+  
+  if (tag === 'HEADER' || cls.includes('header') || cls.includes('navbar') || cls.includes('nav-bar')) {
+    return 'Header Section';
+  }
+  if (tag === 'NAV' || cls.includes('nav') || cls.includes('menu')) {
+    return 'Nav Menu Container';
+  }
+  if (tag === 'FOOTER' || cls.includes('footer')) {
+    return 'Footer Section';
+  }
+  if (tag === 'MAIN' || cls.includes('main') || cls.includes('hero')) {
+    return 'Main Content Section';
+  }
+  if (tag === 'ASIDE' || cls.includes('sidebar')) {
+    return 'Sidebar Container';
+  }
+  if (tag === 'FORM' || cls.includes('form')) {
+    return 'Contact Form Section';
+  }
+  return `Container — ${data.tagName.toLowerCase()}`;
+}
+
+// ─────────────────────────────────────────────
 // Widget Selector
 // ─────────────────────────────────────────────
 
 function buildWidget(data: ElementData): ElementorWidget {
   const tag = data.tagName.toUpperCase();
+  const cls = (data.className || '').toLowerCase();
 
   if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(tag)) return buildHeadingWidget(data);
-  if (['P', 'SPAN', 'BLOCKQUOTE', 'PRE', 'STRONG', 'EM'].includes(tag)) return buildTextWidget(data);
+  if (tag === 'NAV' || cls.includes('nav') || cls.includes('menu')) return buildNavMenuWidget(data);
+  if (tag === 'FORM' || cls.includes('form')) return buildFormWidget(data);
+  if (tag === 'DETAILS' || cls.includes('faq') || cls.includes('accordion')) return buildAccordionWidget(data);
   if (tag === 'BUTTON' || tag === 'A') return buildButtonWidget(data);
-  if (tag === 'IMG' || tag === 'PICTURE') return buildImageWidget(data);
+  if (tag === 'IMG' || tag === 'PICTURE') {
+    if (cls.includes('box') || cls.includes('card')) return buildImageBoxWidget(data);
+    return buildImageWidget(data);
+  }
   if (tag === 'VIDEO' || tag === 'IFRAME') return buildVideoWidget(data);
   if (tag === 'HR') return buildDividerWidget();
-  if (tag === 'I' || tag === 'SVG') return buildIconBoxWidget(data);
+  if (tag === 'I' || tag === 'SVG' || cls.includes('icon')) return buildIconBoxWidget(data);
+  if (['P', 'SPAN', 'BLOCKQUOTE', 'PRE', 'STRONG', 'EM'].includes(tag)) return buildTextWidget(data);
   if (['DIV', 'SECTION', 'ARTICLE', 'MAIN', 'ASIDE', 'HEADER', 'FOOTER'].includes(tag)) {
     if (!data.innerText.trim()) return buildSpacerWidget(data);
     return buildTextWidget(data);
@@ -273,12 +380,14 @@ function buildColumn(widgets: ElementorWidget[], widthPercent = 100): ElementorW
 function buildSection(columns: ElementorWidget[], data: ElementData): ElementorWidget {
   const isFlexDisplay = data.computedStyles.display?.includes('flex');
   const bgColor = normalizeColor(data.computedStyles.backgroundColor);
+  const containerTitle = getSemanticContainerTitle(data);
 
   return {
     id: uid(),
     elType: 'section',
     isInner: false,
     settings: cleanSettings({
+      _title: containerTitle,
       layout: isFlexDisplay ? 'flexbox' : 'default',
       gap: 'default',
       structure: `${columns.length}0`,
@@ -299,21 +408,19 @@ function buildSection(columns: ElementorWidget[], data: ElementData): ElementorW
 }
 
 // ─────────────────────────────────────────────
-// Main Exporter
-// ─────────────────────────────────────────────
-
-// ─────────────────────────────────────────────
 // Atomic Elementor 4.0 Block Builder
 // ─────────────────────────────────────────────
 
 function buildAtomicBlock(childWidgets: ElementorWidget[], data: ElementData): ElementorWidget {
   const isFlex = data.computedStyles.display?.includes('flex') || data.computedStyles.display?.includes('grid');
+  const containerTitle = getSemanticContainerTitle(data);
   return {
     id: uid(),
     version: '0.0',
     elType: isFlex ? 'e-flexbox' : 'e-div-block',
     isInner: false,
     settings: cleanSettings({
+      _title: containerTitle,
       _css_classes: data.className || '',
       background_color: normalizeColor(data.computedStyles.backgroundColor),
       padding: {
@@ -326,7 +433,7 @@ function buildAtomicBlock(childWidgets: ElementorWidget[], data: ElementData): E
       },
     }),
     editor_settings: {
-      title: `Elementorify Atomic ${data.tagName.toUpperCase()}`,
+      title: containerTitle,
     },
     interactions: [],
     styles: [],
