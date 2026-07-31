@@ -5,3 +5,7 @@ Thumbs.db
 # Node dependencies
 node_modules/
 npm-debug.log
+
+# Build archives
+*.zip
+
