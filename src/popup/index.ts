@@ -46,16 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!tab?.id) return;
 
     const tabId = tab.id;
+    const stored = await chrome.storage.local.get(['exportVersion']);
+    const exportVersion = stored.exportVersion || 'v4';
 
     try {
-      await chrome.tabs.sendMessage(tabId, { action: 'enableCaptureData', tabId });
+      await chrome.tabs.sendMessage(tabId, { action: 'enableCaptureData', tabId, exportVersion });
     } catch (_err) {
       try {
         await chrome.scripting.executeScript({
           target: { tabId },
           files: ['content-ui/index.iife.js'],
         });
-        await chrome.tabs.sendMessage(tabId, { action: 'enableCaptureData', tabId });
+        await chrome.tabs.sendMessage(tabId, { action: 'enableCaptureData', tabId, exportVersion });
       } catch (injectErr) {
         console.error('Script injection failed:', injectErr);
         alert('Cannot inspect on this page (Chrome restricts extensions on chrome:// pages and store pages).');

@@ -40,43 +40,44 @@ const mockButton = {
   rect: { width: 180, height: 44, top: 200, left: 100 },
 };
 
-// Test 1: Heading Conversion
+// Test 1: Elementor 4.0 Atomic Heading Conversion
 try {
-  const jsonHeading = generateElementorJSON(mockHeading);
-  console.log('✅ Test 1 Passed: Heading conversion generated valid Elementor structure.');
-  console.log(`   - Version: ${jsonHeading.version}`);
-  console.log(`   - Sections: ${jsonHeading.content.length}`);
-  console.log(`   - Widget Type: ${jsonHeading.content[0].elements[0].elements[0].widgetType}`);
-  console.log(`   - Font Size: ${JSON.stringify(jsonHeading.content[0].elements[0].elements[0].settings.typography_font_size)}`);
+  const jsonHeadingV4 = generateElementorJSON(mockHeading, 'v4');
+  console.log('✅ Test 1 Passed: Elementor 4.0 Atomic Heading conversion valid.');
+  console.log(`   - Schema Version: ${jsonHeadingV4.version}`);
+  console.log(`   - Root Atomic elType: ${jsonHeadingV4.content[0].elType}`);
+  console.log(`   - Inner Widget Type: ${jsonHeadingV4.content[0].elements[0].widgetType}`);
+  console.log(`   - Editor Settings Title: ${jsonHeadingV4.content[0].editor_settings?.title}`);
 } catch (err) {
   console.error('❌ Test 1 Failed:', err);
 }
 
-// Test 2: Button Conversion & Clipboard Serialization
+// Test 2: Elementor 3.x Legacy Button Conversion
 try {
-  const serialized = serializeForClipboard(mockButton);
-  const parsed = JSON.parse(serialized);
-  console.log('\n✅ Test 2 Passed: Button conversion & native Elementor wrapper clean.');
-  console.log(`   - Root Type: ${parsed.type}`);
-  console.log(`   - Widget Type: ${parsed.elements[0].elements[0].elements[0].widgetType}`);
-  console.log(`   - Text: ${parsed.elements[0].elements[0].elements[0].settings.text}`);
-  console.log(`   - Target URL: ${parsed.elements[0].elements[0].elements[0].settings.link.url}`);
-  console.log(`   - Background Color: ${parsed.elements[0].elements[0].elements[0].settings.background_color}`);
+  const serializedV3 = serializeForClipboard(mockButton, 'v3');
+  const parsedV3 = JSON.parse(serializedV3);
+  console.log('\n✅ Test 2 Passed: Elementor 3.x Legacy conversion clean.');
+  console.log(`   - Version: ${parsedV3.version}`);
+  console.log(`   - Section elType: ${parsedV3.elements[0].elType}`);
+  console.log(`   - Widget Type: ${parsedV3.elements[0].elements[0].elements[0].widgetType}`);
+  console.log(`   - Text: ${parsedV3.elements[0].elements[0].elements[0].settings.text}`);
 } catch (err) {
   console.error('❌ Test 2 Failed:', err);
 }
 
-// Test 3: Toast & Clipboard Export Helper
+// Test 3: Elementor 4.0 Atomic Clipboard Serialization & Toast Helper
 try {
   const { copyElementorToClipboard } = await import('../src/content/elementor-exporter');
-  const payload = await copyElementorToClipboard(mockHeading);
-  const parsedHeading = JSON.parse(payload);
-  console.log('\n✅ Test 3 Passed: Copy Toast System & Clipboard helper executed cleanly.');
-  console.log(`   - Payload Type: ${parsedHeading.type}`);
-  console.log(`   - Title: ${parsedHeading.elements[0].elements[0].elements[0].settings.title}`);
+  const payloadV4 = await copyElementorToClipboard(mockHeading, 'v4');
+  const parsedHeadingV4 = JSON.parse(payloadV4);
+  console.log('\n✅ Test 3 Passed: Elementor 4.0 Atomic Toast & Clipboard helper executed cleanly.');
+  console.log(`   - Version: ${parsedHeadingV4.version}`);
+  console.log(`   - Root Atomic Type: ${parsedHeadingV4.elements[0].elType}`);
+  console.log(`   - Title: ${parsedHeadingV4.elements[0].elements[0].settings.title}`);
 } catch (err) {
   console.error('❌ Test 3 Failed:', err);
 }
 
-console.log('\n🎉 All Exporter Tests Completed Successfully!');
+console.log('\n🎉 All Exporter Tests (v4 Atomic & v3 Legacy) Completed Successfully!');
+
 

@@ -22,13 +22,16 @@ export interface ElementData {
   };
 }
 
-export type ExtensionMessage =
+export type ExportVersion = 'v4' | 'v3';
+
+export interface ExtensionMessage =
   | { action: 'elementClicked'; data: ElementData }
   | { action: 'updatePopup'; data: ElementData }
   | { action: 'setViewport'; tabId: number; data: ViewportData }
   | { action: 'restoreViewport'; tabId: number }
-  | { action: 'enableCaptureData'; tabId: number }
+  | { action: 'enableCaptureData'; tabId: number; exportVersion?: ExportVersion }
   | { action: 'DEBUGGER_ATTACHED' }
   | { action: 'DEBUGGER_DETACHED' }
   | { action: 'VIEWPORT_CHANGED'; viewport: ViewportData; error?: boolean }
   | { action: 'VIEWPORT_RESTORED'; error?: boolean };
+

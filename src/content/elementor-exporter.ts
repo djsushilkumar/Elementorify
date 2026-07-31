@@ -1,4 +1,4 @@
-import { ElementData } from '../shared/types';
+import { ElementData, ExportVersion } from '../shared/types';
 import { showCopyToast } from './toast';
 
 // ─────────────────────────────────────────────
@@ -7,10 +7,14 @@ import { showCopyToast } from './toast';
 
 export interface ElementorWidget {
   id: string;
-  elType: 'widget' | 'section' | 'column' | 'container';
+  version?: string;
+  elType: 'widget' | 'section' | 'column' | 'container' | 'e-div-block' | 'e-flexbox' | 'e-grid' | string;
   isInner?: boolean;
   widgetType?: string;
   settings: Record<string, unknown>;
+  editor_settings?: Record<string, unknown>;
+  interactions?: unknown[];
+  styles?: unknown[];
   elements: ElementorWidget[];
 }
 
@@ -298,7 +302,67 @@ function buildSection(columns: ElementorWidget[], data: ElementData): ElementorW
 // Main Exporter
 // ─────────────────────────────────────────────
 
-export function generateElementorJSON(data: ElementData): ElementorExport {
+// ─────────────────────────────────────────────
+// Atomic Elementor 4.0 Block Builder
+// ─────────────────────────────────────────────
+
+function buildAtomicBlock(childWidgets: ElementorWidget[], data: ElementData): ElementorWidget {
+  const isFlex = data.computedStyles.display?.includes('flex') || data.computedStyles.display?.includes('grid');
+  return {
+    id: uid(),
+    version: '0.0',
+    elType: isFlex ? 'e-flexbox' : 'e-div-block',
+    isInner: false,
+    settings: cleanSettings({
+      _css_classes: data.className || '',
+      background_color: normalizeColor(data.computedStyles.backgroundColor),
+      padding: {
+        unit: 'px',
+        top: cssUnit(data.computedStyles.paddingTop) || '0',
+        right: cssUnit(data.computedStyles.paddingRight) || '0',
+        bottom: cssUnit(data.computedStyles.paddingBottom) || '0',
+        left: cssUnit(data.computedStyles.paddingLeft) || '0',
+        isLinked: false,
+      },
+    }),
+    editor_settings: {
+      title: `Elementorify Atomic ${data.tagName.toUpperCase()}`,
+    },
+    interactions: [],
+    styles: [],
+    elements: childWidgets,
+  };
+}
+
+// ─────────────────────────────────────────────
+// Main Exporters (v4 Atomic & v3 Legacy)
+// ─────────────────────────────────────────────
+
+export function generateElementorV4AtomicJSON(data: ElementData): ElementorExport {
+  const tag = data.tagName.toUpperCase();
+  const isLayoutContainer = ['DIV', 'SECTION', 'ARTICLE', 'MAIN', 'ASIDE', 'HEADER', 'FOOTER', 'FORM', 'NAV'].includes(tag);
+
+  let atomicContent: ElementorWidget[];
+
+  if (isLayoutContainer && data.childrenCount > 1) {
+    const childWidgets: ElementorWidget[] = Array.from({ length: Math.min(data.childrenCount, 6) }).map(() =>
+      buildWidget(data)
+    );
+    atomicContent = [buildAtomicBlock(childWidgets, data)];
+  } else {
+    const widget = buildWidget(data);
+    atomicContent = [buildAtomicBlock([widget], data)];
+  }
+
+  return {
+    version: '0.0',
+    title: `Elementorify v4 Atomic Export — ${data.tagName.toLowerCase()}`,
+    type: 'page',
+    content: atomicContent,
+  };
+}
+
+export function generateElementorV3JSON(data: ElementData): ElementorExport {
   const tag = data.tagName.toUpperCase();
   const isLayoutContainer = ['DIV', 'SECTION', 'ARTICLE', 'MAIN', 'ASIDE', 'HEADER', 'FOOTER', 'FORM', 'NAV'].includes(tag);
 
@@ -330,34 +394,40 @@ export function generateElementorJSON(data: ElementData): ElementorExport {
 
   return {
     version: '0.4',
-    title: `Elementorify Export — ${data.tagName.toLowerCase()}`,
+    title: `Elementorify v3 Export — ${data.tagName.toLowerCase()}`,
     type: 'page',
     content: sections,
   };
+}
+
+export function generateElementorJSON(data: ElementData, exportVersion: ExportVersion = 'v4'): ElementorExport {
+  return exportVersion === 'v3' ? generateElementorV3JSON(data) : generateElementorV4AtomicJSON(data);
 }
 
 // ─────────────────────────────────────────────
 // Clipboard Serializer (Native Elementor Payload)
 // ─────────────────────────────────────────────
 
-export function serializeForClipboard(data: ElementData): string {
-  const exportData = generateElementorJSON(data);
+export function serializeForClipboard(data: ElementData, exportVersion: ExportVersion = 'v4'): string {
+  const exportData = generateElementorJSON(data, exportVersion);
   const elementorPayload = {
     type: 'elementor',
+    version: exportVersion === 'v4' ? '0.0' : '0.4',
     siteurl: typeof window !== 'undefined' ? window.location.origin : '',
     elements: exportData.content,
   };
   return JSON.stringify(elementorPayload, null, 2);
 }
 
-export async function copyElementorToClipboard(data: ElementData): Promise<string> {
-  const payload = serializeForClipboard(data);
+export async function copyElementorToClipboard(data: ElementData, exportVersion: ExportVersion = 'v4'): Promise<string> {
+  const payload = serializeForClipboard(data, exportVersion);
   if (typeof navigator !== 'undefined' && navigator.clipboard) {
     await navigator.clipboard.writeText(payload);
   }
   
-  const firstWidgetType = data.tagName.toLowerCase();
+  const firstWidgetType = `${data.tagName.toLowerCase()} (${exportVersion.toUpperCase()} Atomic)`;
   showCopyToast(data.tagName, firstWidgetType);
   return payload;
 }
+
 
