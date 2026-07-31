@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         background: resolve(__dirname, 'src/background/index.ts'),
         'content-ui/index': resolve(__dirname, 'src/content/index.ts'),
+        'popup/index': resolve(__dirname, 'src/popup/index.ts'),
       },
       output: {
         entryFileNames: '[name].iife.js',

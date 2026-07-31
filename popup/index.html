@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elementorify Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --primary: #a855f7;
+      --primary-hover: #9333ea;
+      --accent: #06b6d4;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      width: 340px;
+      padding: 16px;
+      background: var(--bg-gradient);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+    }
+
+    .title-group h1 {
+      font-size: 15px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #c084fc, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .title-group p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 8px;
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border-radius: 12px;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background-color: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    .btn-main {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
+      transition: all 0.2s ease;
+      margin-bottom: 16px;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(168, 85, 247, 0.5);
+    }
+
+    .btn-main:active {
+      transform: translateY(0);
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .viewport-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .btn-vp {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 4px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-vp:hover {
+      border-color: var(--primary);
+      background: rgba(168, 85, 247, 0.1);
+    }
+
+    .btn-vp.active {
+      border-color: var(--accent);
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--accent);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    .element-info {
+      font-size: 12px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+    }
+
+    .info-val {
+      font-weight: 600;
+      font-family: monospace;
+      color: #38bdf8;
+    }
+
+    .empty-state {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 8px 0;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-group">
+      <img src="../icon-256.png" alt="Logo" class="logo-img">
+      <div class="title-group">
+        <h1>Elementorify</h1>
+        <p>HTML to Elementor</p>
+      </div>
+    </div>
+    <div class="status-badge">
+      <span class="dot"></span> Active
+    </div>
+  </div>
+
+  <button id="btn-inspect" class="btn-main">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="16"></line>
+      <line x1="8" y1="12" x2="16" y2="12"></line>
+    </svg>
+    Inspect & Pick Element
+  </button>
+
+  <div class="section-title">Responsive Viewport Emulation</div>
+  <div class="viewport-grid">
+    <button id="vp-desktop" class="btn-vp">
+      <span>🖥️ Desktop</span>
+      <span style="font-size: 9px; opacity: 0.7;">1920 x 1080</span>
+    </button>
+    <button id="vp-tablet" class="btn-vp">
+      <span>📱 Tablet</span>
+      <span style="font-size: 9px; opacity: 0.7;">768 x 1024</span>
+    </button>
+    <button id="vp-mobile" class="btn-vp">
+      <span>📲 Mobile</span>
+      <span style="font-size: 9px; opacity: 0.7;">375 x 812</span>
+    </button>
+  </div>
+
+  <div class="section-title">Last Captured Element</div>
+  <div class="card">
+    <div id="element-details" class="empty-state">
+      No element selected yet.<br>Click "Inspect & Pick Element" above.
+    </div>
+  </div>
+
+  <div class="footer">
+    Elementorify v1.1.6 • Built for WordPress & Elementor
+  </div>
+
+  <script type="module" src="../src/popup/index.ts"></script>
+</body>
+</html>

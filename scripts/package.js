@@ -17,6 +17,7 @@ const filesToInclude = [
 
 const dirsToInclude = [
   'content-ui',
+  'popup',
   '_locales',
 ];
 
