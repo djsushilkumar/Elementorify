@@ -29,19 +29,19 @@
     "default_title": "Elementorify Dashboard",
     "default_popup": "popup/index.html",
     "default_icon": {
-      "16": "icon-16.png",
-      "32": "icon-32.png",
-      "48": "icon-48.png",
-      "128": "icon-128.png",
-      "256": "icon-256.png"
+      "16": "assets/icons/icon-16.png",
+      "32": "assets/icons/icon-32.png",
+      "48": "assets/icons/icon-48.png",
+      "128": "assets/icons/icon-128.png",
+      "256": "assets/icons/icon-256.png"
     }
   },
   "icons": {
-    "16": "icon-16.png",
-    "32": "icon-32.png",
-    "48": "icon-48.png",
-    "128": "icon-128.png",
-    "256": "icon-256.png"
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png",
+    "256": "assets/icons/icon-256.png"
   },
   "content_scripts": [
     {
@@ -61,7 +61,7 @@
         "*.js",
         "*.css",
         "*.svg",
-        "icon-*.png"
+        "assets/icons/*.png"
       ],
       "matches": [
         "*://*/*",

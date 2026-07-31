@@ -15,14 +15,10 @@ const zip = new AdmZip();
 const filesToInclude = [
   'manifest.json',
   'background.iife.js',
-  'icon-16.png',
-  'icon-32.png',
-  'icon-48.png',
-  'icon-128.png',
-  'icon-256.png',
 ];
 
 const dirsToInclude = [
+  'assets',
   'content-ui',
   'popup',
   '_locales',
@@ -50,8 +46,13 @@ dirsToInclude.forEach(dir => {
   }
 });
 
-const outputPathVersioned = path.join(rootDir, `elementorify-v${version}.zip`);
-const outputPathStandard = path.join(rootDir, 'elementorify.zip');
+const distDir = path.join(rootDir, 'dist');
+if (!fs.existsSync(distDir)) {
+  fs.mkdirSync(distDir, { recursive: true });
+}
+
+const outputPathVersioned = path.join(distDir, `elementorify-v${version}.zip`);
+const outputPathStandard = path.join(distDir, 'elementorify.zip');
 
 zip.writeZip(outputPathVersioned);
 zip.writeZip(outputPathStandard);
@@ -59,3 +60,4 @@ zip.writeZip(outputPathStandard);
 console.log(`✅ Packages successfully created:`);
 console.log(`   - ${outputPathVersioned}`);
 console.log(`   - ${outputPathStandard}`);
+
