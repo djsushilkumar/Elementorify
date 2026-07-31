@@ -1,0 +1,51 @@
+{
+"update_url": "https://clients2.google.com/service/update2/crx",
+
+  "manifest_version": 3,
+  "default_locale": "en",
+  "name": "Elementorify - HTML to Elementor Converter",
+  "version": "1.1.6",
+  "description": "Chrome extension to convert web page elements into Elementor widgets effortlessly",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "debugger",
+    "clipboardWrite"
+  ],
+  "background": {
+    "service_worker": "background.iife.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Click to open panel"
+  },
+  "icons": {
+    "256": "icon-256.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*",
+        "file:///*"
+      ],
+      "js": [
+        "content-ui/index.iife.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "*.js",
+        "*.css",
+        "*.svg",
+        "icon-256.png"
+      ],
+      "matches": [
+        "*://*/*",
+        "file:///*"
+      ]
+    }
+  ]
+}

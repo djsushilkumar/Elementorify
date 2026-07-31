@@ -1,0 +1,30 @@
+{
+  "extensionDescription": {
+    "description": "Elementorify - HTML to Elementor",
+    "message": "Chrome extension to convert web page elements into Elementor widgets effortlessly"
+  },
+  "extensionName": {
+    "description": "Extension name",
+    "message": "Elementorify - HTML to Elementor Converter"
+  },
+  "toggleTheme": {
+    "message": "Toggle theme"
+  },
+  "loading": {
+    "message": "Loading..."
+  },
+  "greeting": {
+    "description": "Greeting message",
+    "message": "Hello, My name is $NAME$",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "John Doe"
+      }
+    }
+  },
+  "hello": {
+    "description": "Placeholder example",
+    "message": "Hello $1"
+  }
+}
