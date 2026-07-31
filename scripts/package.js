@@ -7,6 +7,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
+const pkg = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
+const version = pkg.version || '1.2.0';
+
 const zip = new AdmZip();
 
 const filesToInclude = [
@@ -21,7 +24,7 @@ const dirsToInclude = [
   '_locales',
 ];
 
-console.log('📦 Packaging Elementorify Chrome Extension...');
+console.log(`📦 Packaging Elementorify Chrome Extension (v${version})...`);
 
 filesToInclude.forEach(file => {
   const filePath = path.join(rootDir, file);
@@ -43,7 +46,12 @@ dirsToInclude.forEach(dir => {
   }
 });
 
-const outputPath = path.join(rootDir, 'elementorify-v1.1.6.zip');
-zip.writeZip(outputPath);
+const outputPathVersioned = path.join(rootDir, `elementorify-v${version}.zip`);
+const outputPathStandard = path.join(rootDir, 'elementorify.zip');
 
-console.log(`✅ Package successfully created at: ${outputPath}`);
+zip.writeZip(outputPathVersioned);
+zip.writeZip(outputPathStandard);
+
+console.log(`✅ Packages successfully created:`);
+console.log(`   - ${outputPathVersioned}`);
+console.log(`   - ${outputPathStandard}`);

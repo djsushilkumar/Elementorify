@@ -4,7 +4,7 @@
   "manifest_version": 3,
   "default_locale": "en",
   "name": "Elementorify - HTML to Elementor Converter",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "Chrome extension to convert web page elements into Elementor widgets effortlessly",
   "permissions": [
     "storage",
