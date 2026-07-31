@@ -66,4 +66,17 @@ try {
   console.error('❌ Test 2 Failed:', err);
 }
 
+// Test 3: Toast & Clipboard Export Helper
+try {
+  const { copyElementorToClipboard } = await import('../src/content/elementor-exporter');
+  const payload = await copyElementorToClipboard(mockHeading);
+  const parsedHeading = JSON.parse(payload);
+  console.log('\n✅ Test 3 Passed: Copy Toast System & Clipboard helper executed cleanly.');
+  console.log(`   - Payload Type: ${parsedHeading.type}`);
+  console.log(`   - Title: ${parsedHeading.elements[0].elements[0].elements[0].settings.title}`);
+} catch (err) {
+  console.error('❌ Test 3 Failed:', err);
+}
+
 console.log('\n🎉 All Exporter Tests Completed Successfully!');
+

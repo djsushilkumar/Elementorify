@@ -1,4 +1,5 @@
 import { ElementData } from '../shared/types';
+import { showCopyToast } from './toast';
 
 // ─────────────────────────────────────────────
 // Elementor Data Structures
@@ -348,3 +349,15 @@ export function serializeForClipboard(data: ElementData): string {
   };
   return JSON.stringify(elementorPayload, null, 2);
 }
+
+export async function copyElementorToClipboard(data: ElementData): Promise<string> {
+  const payload = serializeForClipboard(data);
+  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    await navigator.clipboard.writeText(payload);
+  }
+  
+  const firstWidgetType = data.tagName.toLowerCase();
+  showCopyToast(data.tagName, firstWidgetType);
+  return payload;
+}
+
