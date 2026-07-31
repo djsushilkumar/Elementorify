@@ -2,9 +2,10 @@
 
 ![Version](https://img.shields.io/badge/version-1.7.0-purple.svg)
 ![Chrome Extension](https://img.shields.io/badge/Chrome_Extension-Manifest_V3-cyan.svg)
+![Elementor 4.0 Atomic](https://img.shields.io/badge/Elementor_v4-Atomic_Architecture-emerald.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-**Elementorify** is a commercial-grade Google Chrome Extension (Manifest V3) that converts any web page HTML element, component, or full layout directly into native **WordPress Elementor** JSON for 1-click pasting into Elementor Editor.
+**Elementorify** is a commercial-grade Google Chrome Extension (Manifest V3) that converts any web page HTML element, component, or full layout directly into native **WordPress Elementor 4.0 (Atomic Design System)** and **Elementor 3.x** JSON for 1-click pasting into Elementor Editor.
 
 ---
 
@@ -18,13 +19,15 @@
 
 ## ✨ Key Features
 
-- 🎯 **Visual Element Inspector**: Hover over any live web page element with neon visual highlights.
-- ⚡ **Native Elementor Format Payload**: Outputs native `{ "type": "elementor", "siteurl": "", "elements": [...] }` clipboard JSON accepted by Elementor without warnings.
+- ⚛️ **Elementor 4.0 Atomic Architecture**: Native payload schema generation for Elementor 4.0 (`e-div-block`, `e-flexbox`, `e-grid`, `styles`, `editor_settings`) + Elementor 3.x dual-engine compatibility.
+- 🎯 **Visual Element Inspector**: Hover over any live web page element with neon visual highlights and instant element selector.
+- 🔔 **Shadow DOM Copy Toast Notifications**: Isolated, glassmorphic toast notification feedback on element capture with instant clipboard paste alerts.
+- ⚡ **Native Elementor Format Payload**: Outputs clean `{ "type": "elementor", "version": "0.0", "siteurl": "", "elements": [...] }` clipboard JSON accepted by Elementor Editor without warnings.
 - 🖼️ **Absolute Asset URL Resolution**: Automatically converts relative image, SVG, logo, link, and background asset URLs to full absolute URLs so images clone 100% cleanly.
 - 🎨 **Popup Accent Customizer**: Live theme switcher (Electric Purple, Cyber Cyan, Emerald Green, Sunset Amber) with persistent preferences.
 - ⌨️ **Global Keyboard Shortcut**: Press `Alt + Shift + E` (Mac: `Option + Shift + E`) anywhere to trigger the inspector instantly.
 - 📱 **Responsive Viewport Emulation**: Test layouts across Desktop (1920x1080), Tablet (768x1024), and Mobile (375x812) using Chrome Debugger Emulation.
-- 🧪 **Automated CI/CD**: Includes automated TypeScript exporter test suite (`npm test`) and GitHub Actions release automation.
+- 🧪 **Automated Test Suite**: Includes TypeScript exporter test suite (`npm test`) covering v4 Atomic & v3 Legacy schemas.
 
 ---
 
@@ -43,7 +46,7 @@
 # Install dependencies
 npm install
 
-# Run automated unit tests
+# Run automated unit tests (v4 Atomic & v3 Legacy schemas)
 npm test
 
 # Build extension bundles
