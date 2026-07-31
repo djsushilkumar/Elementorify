@@ -1,6 +1,6 @@
 {
   "name": "elementorify",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Chrome extension to convert web page elements into Elementor widgets effortlessly",
   "type": "module",
   "scripts": {
