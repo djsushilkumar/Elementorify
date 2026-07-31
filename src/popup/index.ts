@@ -6,6 +6,34 @@ document.addEventListener('DOMContentLoaded', () => {
   const vpTablet = document.getElementById('vp-tablet');
   const vpMobile = document.getElementById('vp-mobile');
   const elementDetails = document.getElementById('element-details');
+  const swatches = document.querySelectorAll<HTMLButtonElement>('.swatch');
+
+  // Theme Accent Customizer Logic
+  function applyTheme(themeName: string) {
+    document.body.setAttribute('data-theme', themeName);
+    swatches.forEach(swatch => {
+      if (swatch.getAttribute('data-theme') === themeName) {
+        swatch.classList.add('active');
+      } else {
+        swatch.classList.remove('active');
+      }
+    });
+    chrome.storage.local.set({ popupTheme: themeName });
+  }
+
+  swatches.forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      const theme = swatch.getAttribute('data-theme');
+      if (theme) applyTheme(theme);
+    });
+  });
+
+  // Load stored theme preference
+  chrome.storage.local.get(['popupTheme'], result => {
+    if (result.popupTheme) {
+      applyTheme(result.popupTheme);
+    }
+  });
 
   async function getActiveTab(): Promise<chrome.tabs.Tab | undefined> {
     const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
