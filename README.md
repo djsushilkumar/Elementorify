@@ -1,33 +1,60 @@
-# Elementorify - HTML to Elementor Converter
+# Elementorify — HTML to Elementor Converter 🚀
 
-**Elementorify** is a powerful Chrome Extension (Manifest V3) designed to help developers and site builders convert any HTML web page element, section, or layout directly into Elementor widget JSON format for WordPress.
+![Version](https://img.shields.io/badge/version-1.7.0-purple.svg)
+![Chrome Extension](https://img.shields.io/badge/Chrome_Extension-Manifest_V3-cyan.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-![Elementorify Icon](icon-256.png)
+**Elementorify** is a commercial-grade Google Chrome Extension (Manifest V3) that converts any web page HTML element, component, or full layout directly into native **WordPress Elementor** JSON for 1-click pasting into Elementor Editor.
 
-## ✨ Features
+---
 
-- **Visual Element Picker**: Hover and select any DOM element directly on any live website.
-- **Computed CSS & Layout Conversion**: Automatically parses flexbox/grid containers, typography, background colors, images, and dimensions.
-- **Elementor JSON Export**: Directly serializes captured elements into Elementor-compatible JSON structures.
-- **One-Click Clipboard Copy**: Effortlessly copy widget data and paste it straight into WordPress Elementor.
-- **Responsive Viewport Simulation**: Simulates custom device width and height via Chrome Debugger protocol (`Emulation.setDeviceMetricsOverride`).
+## 📸 Chrome Web Store Screenshots
 
-## 🚀 Installation (Unpacked Extension)
+![Promotional Banner](assets/store_promo_banner.png)
 
-1. Clone or download this repository.
-2. Open Google Chrome and navigate to `chrome://extensions`.
-3. Enable **Developer mode** in the top right corner.
-4. Click **Load unpacked** and select this directory (`uploaded_html`).
-5. Click the **Elementorify** icon in your browser toolbar to activate the inspector!
+![Feature Showcase](assets/store_feature_screenshot.png)
 
-## 🛠️ Project Structure
+---
 
-- `manifest.json` - Extension V3 configuration & permissions
-- `background.iife.js` - Service worker for message handling & Chrome Debugger emulation
-- `content-ui/index.iife.js` - Shadow DOM overlay and DOM parser content script
-- `icon-256.png` - App icon
-- `_locales/en/messages.json` - English localization strings
+## ✨ Key Features
+
+- 🎯 **Visual Element Inspector**: Hover over any live web page element with neon visual highlights.
+- ⚡ **Native Elementor Format Payload**: Outputs native `{ "type": "elementor", "siteurl": "", "elements": [...] }` clipboard JSON accepted by Elementor without warnings.
+- 🖼️ **Absolute Asset URL Resolution**: Automatically converts relative image, SVG, logo, link, and background asset URLs to full absolute URLs so images clone 100% cleanly.
+- 🎨 **Popup Accent Customizer**: Live theme switcher (Electric Purple, Cyber Cyan, Emerald Green, Sunset Amber) with persistent preferences.
+- ⌨️ **Global Keyboard Shortcut**: Press `Alt + Shift + E` (Mac: `Option + Shift + E`) anywhere to trigger the inspector instantly.
+- 📱 **Responsive Viewport Emulation**: Test layouts across Desktop (1920x1080), Tablet (768x1024), and Mobile (375x812) using Chrome Debugger Emulation.
+- 🧪 **Automated CI/CD**: Includes automated TypeScript exporter test suite (`npm test`) and GitHub Actions release automation.
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+| :--- | :--- |
+| `Alt + Shift + E` | Toggle Elementorify Visual Inspector |
+| `Esc` | Cancel Inspection Overlay |
+
+---
+
+## 🛠️ Development & Building
+
+```bash
+# Install dependencies
+npm install
+
+# Run automated unit tests
+npm test
+
+# Build extension bundles
+npm run build
+
+# Package production ZIP
+npm run package
+```
+
+---
 
 ## 📄 License
 
-MIT License
+[MIT License](LICENSE) • Built for WordPress & Elementor developers worldwide.
