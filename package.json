@@ -6,13 +6,15 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
-    "package": "npm run build && node scripts/package.js"
+    "package": "npm run build && node scripts/package.js",
+    "test": "tsx scripts/test-exporter.ts"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.268",
     "@types/node": "^20.12.12",
     "@types/webextension-polyfill": "^0.10.7",
     "adm-zip": "^0.5.12",
+    "tsx": "^4.19.0",
     "typescript": "^5.4.5",
     "vite": "^5.2.11"
   },

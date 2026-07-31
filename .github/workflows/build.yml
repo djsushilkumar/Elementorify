@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run Exporter Unit Tests
+        run: npm test
+
       - name: Build & Package Extension
         run: npm run package
 
