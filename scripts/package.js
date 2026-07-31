@@ -8,13 +8,17 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
 const pkg = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
-const version = pkg.version || '1.2.0';
+const version = pkg.version || '1.7.0';
 
 const zip = new AdmZip();
 
 const filesToInclude = [
   'manifest.json',
   'background.iife.js',
+  'icon-16.png',
+  'icon-32.png',
+  'icon-48.png',
+  'icon-128.png',
   'icon-256.png',
 ];
 
