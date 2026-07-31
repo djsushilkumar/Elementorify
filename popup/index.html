@@ -9,14 +9,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-      --card-bg: rgba(30, 41, 59, 0.7);
-      --primary: #a855f7;
-      --primary-hover: #9333ea;
-      --accent: #06b6d4;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: rgba(255, 255, 255, 0.1);
+      --bg: #090d16;
+      --card-bg: rgba(17, 24, 39, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary-gradient: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
+      --primary-hover: linear-gradient(135deg, #9333ea 0%, #0891b2 100%);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent: #38bdf8;
+      --success: #22c55e;
     }
 
     * {
@@ -27,203 +28,241 @@
     }
 
     body {
-      width: 340px;
+      width: 350px;
       padding: 16px;
-      background: var(--bg-gradient);
-      color: var(--text);
+      background: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
+      color: var(--text-main);
       overflow: hidden;
+      border-radius: 12px;
     }
 
+    /* Header */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 16px;
       padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--card-border);
     }
 
-    .logo-group {
+    .brand {
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .logo-img {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      box-shadow: 0 0 14px rgba(168, 85, 247, 0.4);
+      border: 1px solid rgba(168, 85, 247, 0.3);
     }
 
-    .title-group h1 {
-      font-size: 15px;
+    .brand-title {
+      font-size: 16px;
       font-weight: 700;
-      background: linear-gradient(90deg, #c084fc, #38bdf8);
+      letter-spacing: -0.3px;
+      background: linear-gradient(90deg, #c084fc 0%, #38bdf8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .title-group p {
+    .brand-subtitle {
       font-size: 11px;
-      color: var(--text-muted);
+      color: var(--text-sub);
     }
 
-    .status-badge {
-      display: flex;
+    .status-tag {
+      display: inline-flex;
       align-items: center;
       gap: 6px;
       font-size: 11px;
-      font-weight: 500;
-      padding: 4px 8px;
-      background: rgba(34, 197, 94, 0.15);
+      font-weight: 600;
+      padding: 4px 10px;
+      background: rgba(34, 197, 94, 0.12);
       color: #4ade80;
-      border-radius: 12px;
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 20px;
+      border: 1px solid rgba(34, 197, 94, 0.25);
     }
 
-    .dot {
+    .status-dot {
       width: 6px;
       height: 6px;
-      background-color: #22c55e;
+      background: var(--success);
       border-radius: 50%;
-      box-shadow: 0 0 8px #22c55e;
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
     }
 
-    .btn-main {
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.2); }
+    }
+
+    /* Main Inspect Button */
+    .btn-inspect {
       width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
-      color: #fff;
-      font-size: 13px;
+      padding: 13px;
+      background: var(--primary-gradient);
+      color: #ffffff;
+      font-size: 13.5px;
       font-weight: 600;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
-      transition: all 0.2s ease;
-      margin-bottom: 16px;
+      gap: 10px;
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.35);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-bottom: 18px;
     }
 
-    .btn-main:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(168, 85, 247, 0.5);
+    .btn-inspect:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1.5px);
+      box-shadow: 0 6px 24px rgba(168, 85, 247, 0.5);
     }
 
-    .btn-main:active {
+    .btn-inspect:active {
       transform: translateY(0);
     }
 
-    .section-title {
+    /* Section Headers */
+    .section-header {
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
+      letter-spacing: 0.6px;
+      color: var(--text-sub);
       margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .viewport-grid {
+    /* Viewport Grid */
+    .viewport-container {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
-    .btn-vp {
+    .vp-btn {
       background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 4px;
-      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 9px 6px;
+      border-radius: 10px;
       font-size: 11px;
       font-weight: 500;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
+      backdrop-filter: blur(8px);
       transition: all 0.2s ease;
     }
 
-    .btn-vp:hover {
-      border-color: var(--primary);
+    .vp-btn:hover {
+      border-color: rgba(168, 85, 247, 0.5);
       background: rgba(168, 85, 247, 0.1);
     }
 
-    .btn-vp.active {
+    .vp-btn.active {
       border-color: var(--accent);
-      background: rgba(6, 182, 212, 0.15);
+      background: rgba(56, 189, 248, 0.15);
       color: var(--accent);
     }
 
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 16px;
-      backdrop-filter: blur(8px);
+    .vp-dim {
+      font-size: 9px;
+      color: var(--text-sub);
     }
 
-    .element-info {
+    /* Info Card */
+    .info-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(12px);
+    }
+
+    .empty-info {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text-sub);
+      line-height: 1.5;
+      padding: 6px 0;
+    }
+
+    .data-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .data-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       font-size: 12px;
     }
 
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
+    .data-label {
+      color: var(--text-sub);
     }
 
-    .info-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .info-label {
-      color: var(--text-muted);
-    }
-
-    .info-val {
+    .data-val {
       font-weight: 600;
       font-family: monospace;
-      color: #38bdf8;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .empty-state {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-muted);
-      padding: 8px 0;
-    }
-
+    /* Footer */
     .footer {
       text-align: center;
-      font-size: 10px;
-      color: var(--text-muted);
+      font-size: 10.5px;
+      color: var(--text-sub);
+      padding-top: 4px;
     }
   </style>
 </head>
 <body>
+  <!-- Header -->
   <div class="header">
-    <div class="logo-group">
-      <img src="/icon-256.png" alt="Logo" class="logo-img">
-      <div class="title-group">
-        <h1>Elementorify</h1>
-        <p>HTML to Elementor</p>
+    <div class="brand">
+      <img src="/icon-256.png" alt="Logo" class="brand-logo">
+      <div>
+        <div class="brand-title">Elementorify</div>
+        <div class="brand-subtitle">HTML to Elementor Converter</div>
       </div>
     </div>
-    <div class="status-badge">
-      <span class="dot"></span> Active
+    <div class="status-tag">
+      <span class="status-dot"></span> Active
     </div>
   </div>
 
-  <button id="btn-inspect" class="btn-main">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- Primary Action -->
+  <button id="btn-inspect" class="btn-inspect">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="10"></circle>
       <line x1="12" y1="8" x2="12" y2="16"></line>
       <line x1="8" y1="12" x2="16" y2="12"></line>
@@ -231,31 +270,38 @@
     Inspect & Pick Element
   </button>
 
-  <div class="section-title">Responsive Viewport Emulation</div>
-  <div class="viewport-grid">
-    <button id="vp-desktop" class="btn-vp">
+  <!-- Viewport Emulation -->
+  <div class="section-header">
+    <span>Responsive Viewport</span>
+  </div>
+  <div class="viewport-container">
+    <button id="vp-desktop" class="vp-btn">
       <span>🖥️ Desktop</span>
-      <span style="font-size: 9px; opacity: 0.7;">1920 x 1080</span>
+      <span class="vp-dim">1920 × 1080</span>
     </button>
-    <button id="vp-tablet" class="btn-vp">
+    <button id="vp-tablet" class="vp-btn">
       <span>📱 Tablet</span>
-      <span style="font-size: 9px; opacity: 0.7;">768 x 1024</span>
+      <span class="vp-dim">768 × 1024</span>
     </button>
-    <button id="vp-mobile" class="btn-vp">
+    <button id="vp-mobile" class="vp-btn">
       <span>📲 Mobile</span>
-      <span style="font-size: 9px; opacity: 0.7;">375 x 812</span>
+      <span class="vp-dim">375 × 812</span>
     </button>
   </div>
 
-  <div class="section-title">Last Captured Element</div>
-  <div class="card">
-    <div id="element-details" class="empty-state">
-      No element selected yet.<br>Click "Inspect & Pick Element" above.
+  <!-- Last Captured Element Info -->
+  <div class="section-header">
+    <span>Last Captured Element</span>
+  </div>
+  <div class="info-card">
+    <div id="element-details" class="empty-info">
+      No element captured yet.<br>Click <strong>"Inspect & Pick Element"</strong> above.
     </div>
   </div>
 
+  <!-- Footer -->
   <div class="footer">
-    Elementorify v1.2.1 • Built for WordPress & Elementor
+    Elementorify v1.4.0 • Built for WordPress & Elementor
   </div>
 
   <script src="index.iife.js"></script>
