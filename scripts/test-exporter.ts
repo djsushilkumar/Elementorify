@@ -56,11 +56,12 @@ try {
 try {
   const serialized = serializeForClipboard(mockButton);
   const parsed = JSON.parse(serialized);
-  console.log('\n✅ Test 2 Passed: Button conversion & serialization clean.');
-  console.log(`   - Widget Type: ${parsed[0].elements[0].elements[0].widgetType}`);
-  console.log(`   - Text: ${parsed[0].elements[0].elements[0].settings.text}`);
-  console.log(`   - Target URL: ${parsed[0].elements[0].elements[0].settings.link.url}`);
-  console.log(`   - Background Color: ${parsed[0].elements[0].elements[0].settings.background_color}`);
+  console.log('\n✅ Test 2 Passed: Button conversion & native Elementor wrapper clean.');
+  console.log(`   - Root Type: ${parsed.type}`);
+  console.log(`   - Widget Type: ${parsed.elements[0].elements[0].elements[0].widgetType}`);
+  console.log(`   - Text: ${parsed.elements[0].elements[0].elements[0].settings.text}`);
+  console.log(`   - Target URL: ${parsed.elements[0].elements[0].elements[0].settings.link.url}`);
+  console.log(`   - Background Color: ${parsed.elements[0].elements[0].elements[0].settings.background_color}`);
 } catch (err) {
   console.error('❌ Test 2 Failed:', err);
 }

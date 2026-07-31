@@ -292,5 +292,10 @@ export function generateElementorJSON(data: ElementData): ElementorExport {
 
 export function serializeForClipboard(data: ElementData): string {
   const exportData = generateElementorJSON(data);
-  return JSON.stringify(exportData.content, null, 2);
+  const elementorPayload = {
+    type: 'elementor',
+    siteurl: '',
+    elements: exportData.content,
+  };
+  return JSON.stringify(elementorPayload, null, 2);
 }
