@@ -1,5 +1,5 @@
 import { ExtensionMessage, ElementData } from '../shared/types';
-import { generateElementorJSON } from './elementor-exporter';
+import { serializeForClipboard } from './elementor-exporter';
 
 let isActive = false;
 let overlayElement: HTMLDivElement | null = null;
@@ -24,6 +24,43 @@ function createInspectorOverlay() {
   return overlayElement;
 }
 
+function showToast(message: string, type: 'success' | 'error' = 'success') {
+  const toast = document.createElement('div');
+  toast.id = 'elementorify-toast';
+  Object.assign(toast.style, {
+    position: 'fixed',
+    bottom: '24px',
+    right: '24px',
+    padding: '12px 20px',
+    borderRadius: '10px',
+    backgroundColor: type === 'success' ? '#1e1b4b' : '#450a0a',
+    color: '#ffffff',
+    border: type === 'success' ? '1px solid #a855f7' : '1px solid #ef4444',
+    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5), 0 0 12px rgba(168, 85, 247, 0.3)',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    fontSize: '13px',
+    fontWeight: '600',
+    zIndex: '9999999',
+    opacity: '0',
+    transform: 'translateY(10px)',
+    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+    pointerEvents: 'none',
+  });
+  toast.innerText = message;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  });
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
 function extractElementData(el: HTMLElement): ElementData {
   const rect = el.getBoundingClientRect();
   const computed = window.getComputedStyle(el);
@@ -46,9 +83,19 @@ function extractElementData(el: HTMLElement): ElementData {
       fontWeight: computed.fontWeight,
       display: computed.display,
       flexDirection: computed.flexDirection,
+      textAlign: computed.textAlign,
       padding: computed.padding,
+      paddingTop: computed.paddingTop,
+      paddingRight: computed.paddingRight,
+      paddingBottom: computed.paddingBottom,
+      paddingLeft: computed.paddingLeft,
       margin: computed.margin,
+      marginTop: computed.marginTop,
+      marginRight: computed.marginRight,
+      marginBottom: computed.marginBottom,
+      marginLeft: computed.marginLeft,
       borderRadius: computed.borderRadius,
+      height: computed.height,
     },
     attributes,
     childrenCount: el.children.length,
@@ -84,15 +131,18 @@ function handleClick(e: MouseEvent) {
   e.stopPropagation();
 
   const data = extractElementData(target);
-  const elementorWidget = generateElementorJSON(data);
-  const jsonString = JSON.stringify([elementorWidget], null, 2);
+  const jsonString = serializeForClipboard(data);
 
-  // Copy to clipboard
-  navigator.clipboard.writeText(jsonString).then(() => {
-    console.log('[Elementorify] Widget JSON copied to clipboard!');
-  }).catch(err => {
-    console.error('[Elementorify] Clipboard write failed:', err);
-  });
+  // Copy to clipboard and show toast
+  navigator.clipboard.writeText(jsonString)
+    .then(() => {
+      showToast('✅ Elementor JSON copied!', 'success');
+      console.log('[Elementorify] Widget JSON copied to clipboard!');
+    })
+    .catch(err => {
+      showToast('❌ Clipboard write failed', 'error');
+      console.error('[Elementorify] Clipboard write failed:', err);
+    });
 
   // Notify background script
   chrome.runtime.sendMessage({
