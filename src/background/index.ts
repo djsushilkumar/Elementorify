@@ -22,9 +22,7 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, _sendR
             .sendMessage(message.tabId, {
               action: 'DEBUGGER_ATTACHED',
             })
-            .catch(() => {
-              // Ignore if content script is unavailable
-            });
+            .catch(() => {});
         });
       } else {
         return Promise.resolve();
@@ -97,11 +95,21 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, _sendR
   }
 });
 
-chrome.action.onClicked.addListener(_tab => {
+function triggerInspectorOnActiveTab() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (tabs.length > 0) {
       const tabId = tabs[0].id ?? 0;
       chrome.tabs.sendMessage(tabId, { action: 'enableCaptureData', tabId }).catch(() => {});
     }
   });
+}
+
+chrome.action.onClicked.addListener(_tab => {
+  triggerInspectorOnActiveTab();
+});
+
+chrome.commands.onCommand.addListener(command => {
+  if (command === 'toggle-inspector') {
+    triggerInspectorOnActiveTab();
+  }
 });

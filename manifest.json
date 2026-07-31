@@ -3,7 +3,7 @@
   "manifest_version": 3,
   "default_locale": "en",
   "name": "Elementorify - HTML to Elementor Converter",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Chrome extension to convert web page elements into Elementor widgets effortlessly",
   "permissions": [
     "storage",
@@ -12,6 +12,15 @@
     "clipboardWrite",
     "scripting"
   ],
+  "commands": {
+    "toggle-inspector": {
+      "suggested_key": {
+        "default": "Alt+Shift+E",
+        "mac": "Alt+Shift+E"
+      },
+      "description": "Activate Elementorify Inspector"
+    }
+  },
   "background": {
     "service_worker": "background.iife.js",
     "type": "module"
