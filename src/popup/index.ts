@@ -1,4 +1,4 @@
-import { ElementData } from '../shared/types';
+import { ElementData, GlobalPaletteData } from '../shared/types';
 
 document.addEventListener('DOMContentLoaded', () => {
   const btnInspect = document.getElementById('btn-inspect');
@@ -7,6 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const vpMobile = document.getElementById('vp-mobile');
   const elementDetails = document.getElementById('element-details');
   const swatches = document.querySelectorAll<HTMLButtonElement>('.swatch');
+  const btnScanPalette = document.getElementById('btn-scan-palette');
+  const paletteCard = document.getElementById('palette-card');
+  const paletteColors = document.getElementById('palette-colors');
+  const paletteFonts = document.getElementById('palette-fonts');
+  const btnCopyKit = document.getElementById('btn-copy-kit');
+  let currentKitPayload: string = '';
 
   // Theme Accent Customizer Logic
   function applyTheme(themeName: string) {
@@ -64,6 +70,52 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } finally {
       window.close();
+    }
+  });
+
+  // Global Palette Scanner
+  btnScanPalette?.addEventListener('click', async () => {
+    const tab = await getActiveTab();
+    if (!tab?.id) return;
+    try {
+      await chrome.tabs.sendMessage(tab.id, { action: 'extractGlobalPalette', tabId: tab.id });
+    } catch (_err) {
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['content-ui/index.iife.js'],
+        });
+        await chrome.tabs.sendMessage(tab.id, { action: 'extractGlobalPalette', tabId: tab.id });
+      } catch (_injectErr) {
+        alert('Cannot extract palette on restricted Chrome pages.');
+      }
+    }
+  });
+
+  function renderPaletteData(data: GlobalPaletteData) {
+    if (!paletteCard || !paletteColors || !paletteFonts) return;
+    paletteCard.style.display = 'block';
+
+    paletteColors.innerHTML = data.colors
+      .map(
+        c =>
+          `<div style="width: 22px; height: 22px; border-radius: 6px; background: ${c.color}; border: 1px solid rgba(255,255,255,0.2);" title="${c.title}: ${c.color}"></div>`
+      )
+      .join('');
+
+    paletteFonts.innerHTML = `Fonts: <strong>${data.fonts.map(f => f.fontFamily).join(', ')}</strong>`;
+    currentKitPayload = JSON.stringify(data.elementorKitPayload, null, 2);
+  }
+
+  btnCopyKit?.addEventListener('click', () => {
+    if (currentKitPayload) {
+      navigator.clipboard.writeText(currentKitPayload);
+      if (btnCopyKit) {
+        btnCopyKit.innerText = '✅ Kit JSON Copied!';
+        setTimeout(() => {
+          btnCopyKit.innerText = '📋 Copy Elementor Kit JSON';
+        }, 2000);
+      }
     }
   });
 
@@ -136,6 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.runtime.onMessage.addListener(message => {
     if (message.action === 'updatePopup') {
       displayElementData(message.data);
+    }
+    if (message.action === 'globalPaletteExtracted') {
+      renderPaletteData(message.data);
     }
   });
 });

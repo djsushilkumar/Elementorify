@@ -93,6 +93,14 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, _sendR
           .catch(() => {});
       });
   }
+
+  if (message.action === 'extractGlobalPalette') {
+    chrome.tabs.sendMessage(message.tabId, { action: 'extractGlobalPalette', tabId: message.tabId }).catch(() => {});
+  }
+
+  if (message.action === 'globalPaletteExtracted') {
+    chrome.runtime.sendMessage({ action: 'globalPaletteExtracted', data: message.data }).catch(() => {});
+  }
 });
 
 function triggerInspectorOnActiveTab() {

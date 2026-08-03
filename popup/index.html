@@ -356,19 +356,24 @@
     </button>
   </div>
 
-  <!-- Last Captured Element Info -->
+  <!-- Global Palette Extractor -->
   <div class="section-header">
-    <span>Last Captured Element</span>
+    <span>Global Style Palette</span>
   </div>
-  <div class="info-card">
-    <div id="element-details" class="empty-info">
-      No element captured yet.<br>Click <strong>"Inspect & Pick Element"</strong> above.
-    </div>
+  <button id="btn-scan-palette" class="btn-inspect" style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: var(--text-main); font-size: 12px; padding: 9px; margin-bottom: 10px; box-shadow: none;">
+    🎨 Scan & Extract Page Palette
+  </button>
+  <div id="palette-card" class="info-card" style="display: none; margin-bottom: 16px;">
+    <div id="palette-colors" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;"></div>
+    <div id="palette-fonts" style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;"></div>
+    <button id="btn-copy-kit" style="width: 100%; padding: 6px; background: rgba(56, 189, 248, 0.15); border: 1px solid var(--accent); color: var(--accent); border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer;">
+      📋 Copy Elementor Kit JSON
+    </button>
   </div>
 
   <!-- Footer -->
   <div class="footer">
-    Elementorify v1.6.0 • Built for WordPress & Elementor
+    Elementorify v1.7.0 • Built for WordPress & Elementor
   </div>
 
   <script src="index.iife.js"></script>

@@ -5,6 +5,10 @@ export default defineConfig({
   build: {
     outDir: '.',
     emptyOutDir: false,
+    chunkSizeWarningLimit: 1500,
+    target: 'es2022',
+    minify: 'esbuild',
+    cssMinify: true,
     rollupOptions: {
       input: {
         background: resolve(__dirname, 'src/background/index.ts'),
@@ -14,6 +18,7 @@ export default defineConfig({
       output: {
         entryFileNames: '[name].iife.js',
         format: 'es',
+        compact: true,
       },
     },
   },

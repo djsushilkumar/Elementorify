@@ -104,7 +104,128 @@ try {
   console.error('❌ Test 4 Failed:', err);
 }
 
-console.log('\n🎉 All Exporter Tests (v4 Atomic & v3 Legacy) Completed Successfully!');
+// Test 5: CSS Flexbox & CSS Grid Container Conversion
+const mockFlexGridContainer = {
+  tagName: 'SECTION',
+  className: 'grid-layout-section',
+  id: 'features-grid',
+  innerText: 'Feature 1 Feature 2 Feature 3',
+  innerHTML: '<div>Feature 1</div><div>Feature 2</div><div>Feature 3</div>',
+  computedStyles: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '24px',
+    backgroundColor: 'rgb(30, 41, 59)',
+    borderStyle: 'solid',
+    borderWidth: '2px',
+    borderColor: 'rgb(168, 85, 247)',
+    boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.25)',
+  },
+  attributes: { id: 'features-grid' },
+  childrenCount: 3,
+  rect: { width: 1200, height: 400, top: 0, left: 0 },
+};
+
+try {
+  const jsonGrid = generateElementorJSON(mockFlexGridContainer, 'v4');
+  const containerSettings = jsonGrid.content[0].settings as Record<string, any>;
+  console.log('\n✅ Test 5 Passed: CSS Grid container layout conversion valid.');
+  console.log(`   - Container elType: ${jsonGrid.content[0].elType}`);
+  console.log(`   - Grid Columns: ${containerSettings.grid_columns_grid?.size}`);
+  console.log(`   - Border Style: ${containerSettings.border_border}`);
+  console.log(`   - Box Shadow Active: ${containerSettings.box_shadow_box_shadow_type}`);
+} catch (err) {
+  console.error('❌ Test 5 Failed:', err);
+}
+
+// Test 6: CSS Gradient Background Extraction
+const mockGradientCard = {
+  tagName: 'DIV',
+  className: 'hero-gradient-card',
+  id: 'card-gradient',
+  innerText: 'Gradient Card Content',
+  innerHTML: '<p>Gradient Card Content</p>',
+  computedStyles: {
+    display: 'block',
+    backgroundImage: 'linear-gradient(135deg, rgb(168, 85, 247) 0%, rgb(6, 182, 212) 100%)',
+    hoverBackgroundColor: 'rgb(236, 72, 153)',
+    transitionDuration: '0.3s',
+  },
+  attributes: { id: 'card-gradient' },
+  childrenCount: 1,
+  rect: { width: 400, height: 250, top: 0, left: 0 },
+};
+
+try {
+  const jsonGradient = generateElementorJSON(mockGradientCard, 'v4');
+  const settings = jsonGradient.content[0].settings as Record<string, any>;
+  console.log('\n✅ Test 6 Passed: CSS Gradient background & hover transition valid.');
+  console.log(`   - Background Type: ${settings.background_background}`);
+  console.log(`   - Gradient Color A: ${settings.background_color}`);
+  console.log(`   - Gradient Color B: ${settings.background_color_b}`);
+  console.log(`   - Gradient Angle: ${settings.background_gradient_angle?.size}°`);
+  console.log(`   - Hover Background Color: ${settings.background_hover_color}`);
+} catch (err) {
+  console.error('❌ Test 6 Failed:', err);
+}
+
+// Test 7: Advanced Typography Export
+const mockTypographyHeading = {
+  tagName: 'H1',
+  className: 'hero-headline',
+  id: 'main-title',
+  innerText: 'Transform HTML into Elementor',
+  innerHTML: 'Transform HTML into Elementor',
+  computedStyles: {
+    fontFamily: "'Outfit', sans-serif",
+    fontSize: '48px',
+    fontWeight: '800',
+    lineHeight: '1.2',
+    letterSpacing: '-1px',
+    textTransform: 'uppercase',
+    fontStyle: 'italic',
+    color: 'rgb(255, 255, 255)',
+  },
+  attributes: {},
+  childrenCount: 0,
+  rect: { width: 800, height: 60, top: 0, left: 0 },
+};
+
+try {
+  const jsonTypography = generateElementorJSON(mockTypographyHeading, 'v4');
+  const headingSettings = jsonTypography.content[0].elements[0].settings as Record<string, any>;
+  console.log('\n✅ Test 7 Passed: Advanced Typography settings output valid.');
+  console.log(`   - Font Family: ${headingSettings.typography_font_family}`);
+  console.log(`   - Font Size: ${headingSettings.typography_font_size?.size}px`);
+  console.log(`   - Line Height: ${headingSettings.typography_line_height?.size}em`);
+  console.log(`   - Letter Spacing: ${headingSettings.typography_letter_spacing?.size}px`);
+  console.log(`   - Text Transform: ${headingSettings.typography_transform}`);
+  console.log(`   - Font Style: ${headingSettings.typography_font_style}`);
+} catch (err) {
+  console.error('❌ Test 7 Failed:', err);
+}
+
+// Test 8: Global Color & Typography Palette Extraction
+try {
+  const { extractGlobalPaletteFromElements } = await import('../src/content/palette-extractor');
+  const mockPageStyles = [
+    { color: 'rgb(168, 85, 247)', backgroundColor: 'rgb(15, 23, 42)', fontFamily: "'Outfit', sans-serif" },
+    { color: 'rgb(6, 182, 212)', backgroundColor: 'rgb(15, 23, 42)', fontFamily: "'Inter', sans-serif" },
+    { color: 'rgb(236, 72, 153)', backgroundColor: 'rgb(30, 41, 59)', fontFamily: "'Outfit', sans-serif" },
+  ];
+
+  const palette = extractGlobalPaletteFromElements(mockPageStyles);
+  console.log('\n✅ Test 8 Passed: Global Color & Typography Palette extraction valid.');
+  console.log(`   - Total Extracted Colors: ${palette.colors.length}`);
+  console.log(`   - Primary Color: ${palette.colors.find(c => c.id === 'primary')?.color}`);
+  console.log(`   - Secondary Color: ${palette.colors.find(c => c.id === 'secondary')?.color}`);
+  console.log(`   - Primary Font: ${palette.fonts.find(f => f.id === 'primary')?.fontFamily}`);
+  console.log(`   - Kit Payload Type: ${palette.elementorKitPayload.type}`);
+} catch (err) {
+  console.error('❌ Test 8 Failed:', err);
+}
+
+console.log('\n🎉 All Exporter Tests (v4 Atomic, v3 Legacy, Advanced Styling & Global Palette) Completed Successfully!');
 
 
 

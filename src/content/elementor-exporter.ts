@@ -1,5 +1,6 @@
 import { ElementData, ExportVersion } from '../shared/types';
 import { showCopyToast } from './toast';
+export { extractPageGlobalPalette, extractGlobalPaletteFromElements } from './palette-extractor';
 
 // ─────────────────────────────────────────────
 // Elementor Data Structures
@@ -96,12 +97,232 @@ function cleanSettings(settings: Record<string, any>): Record<string, any> {
 }
 
 // ─────────────────────────────────────────────
+// Advanced CSS Parsing Helpers
+// ─────────────────────────────────────────────
+
+function cleanFontFamily(fontStr: string | undefined): string {
+  if (!fontStr || fontStr === 'inherit' || fontStr === 'initial') return '';
+  const firstFont = fontStr.split(',')[0].trim().replace(/['"]/g, '');
+  if (['sans-serif', 'serif', 'monospace', 'cursive', 'system-ui', '-apple-system', 'blinkmacsystemfont'].includes(firstFont.toLowerCase())) {
+    return '';
+  }
+  return firstFont;
+}
+
+function parseTypographySettings(computedStyles: Record<string, string>): Record<string, any> {
+  const fontFamily = cleanFontFamily(computedStyles.fontFamily);
+  const fontSize = cssUnit(computedStyles.fontSize);
+  const fontWeight = computedStyles.fontWeight;
+  const lineHeight = computedStyles.lineHeight;
+  const letterSpacing = computedStyles.letterSpacing;
+  const textTransform = computedStyles.textTransform;
+  const fontStyle = computedStyles.fontStyle;
+  const textDecoration = computedStyles.textDecorationLine || computedStyles.textDecoration;
+
+  const typography: Record<string, any> = {
+    typography_typography: 'custom',
+  };
+
+  if (fontFamily) typography.typography_font_family = fontFamily;
+  if (fontSize) typography.typography_font_size = { unit: 'px', size: fontSize };
+  if (fontWeight && fontWeight !== 'normal') typography.typography_font_weight = fontWeight;
+
+  if (lineHeight && lineHeight !== 'normal') {
+    if (lineHeight.endsWith('px')) {
+      typography.typography_line_height = { unit: 'px', size: cssUnit(lineHeight) };
+    } else if (!isNaN(Number(lineHeight))) {
+      typography.typography_line_height = { unit: 'em', size: lineHeight };
+    }
+  }
+
+  if (letterSpacing && letterSpacing !== 'normal' && letterSpacing !== '0px') {
+    typography.typography_letter_spacing = { unit: 'px', size: cssUnit(letterSpacing) };
+  }
+
+  if (textTransform && textTransform !== 'none') {
+    typography.typography_transform = textTransform;
+  }
+
+  if (fontStyle && (fontStyle === 'italic' || fontStyle === 'oblique')) {
+    typography.typography_font_style = fontStyle;
+  }
+
+  if (textDecoration && textDecoration !== 'none') {
+    if (textDecoration.includes('underline')) typography.typography_text_decoration = 'underline';
+    else if (textDecoration.includes('line-through')) typography.typography_text_decoration = 'line-through';
+  }
+
+  return typography;
+}
+
+function parseCSSGradient(bgImageStr: string | undefined): Record<string, any> {
+  if (!bgImageStr || bgImageStr === 'none') return {};
+
+  const isLinear = bgImageStr.includes('linear-gradient');
+  const isRadial = bgImageStr.includes('radial-gradient');
+  if (!isLinear && !isRadial) return {};
+
+  const colorMatches = bgImageStr.match(/(?:rgba?\(.+?\)|#[0-9a-fA-F]{3,8}|[a-z]+)/gi);
+  if (!colorMatches || colorMatches.length < 2) return {};
+
+  const colors = colorMatches.filter(c => !['linear', 'radial', 'gradient', 'to', 'top', 'bottom', 'left', 'right', 'deg', 'circle', 'at', 'center'].includes(c.toLowerCase()));
+  if (colors.length < 2) return {};
+
+  const color1 = normalizeColor(colors[0]);
+  const color2 = normalizeColor(colors[1]);
+
+  let angle = '180';
+  const angleMatch = bgImageStr.match(/(\d+)deg/i);
+  if (angleMatch) {
+    angle = angleMatch[1];
+  } else if (bgImageStr.includes('to right')) {
+    angle = '90';
+  } else if (bgImageStr.includes('to bottom')) {
+    angle = '180';
+  } else if (bgImageStr.includes('to left')) {
+    angle = '270';
+  } else if (bgImageStr.includes('to top')) {
+    angle = '0';
+  }
+
+  return cleanSettings({
+    background_background: 'gradient',
+    background_color: color1,
+    background_color_b: color2,
+    background_gradient_type: isRadial ? 'radial' : 'linear',
+    background_gradient_angle: { unit: 'deg', size: angle },
+    background_gradient_position: isRadial ? 'center center' : '',
+  });
+}
+
+function parseBoxShadowSettings(shadowStr: string | undefined): Record<string, any> {
+  if (!shadowStr || shadowStr === 'none') return {};
+
+  const pxMatches = shadowStr.match(/(-?\d+px)/g);
+  const colorMatch = shadowStr.match(/rgba?\([^)]+\)|#[0-9a-fA-F]{3,8}/);
+
+  if (!pxMatches || pxMatches.length < 2) return {};
+
+  const horizontal = cssUnit(pxMatches[0]) || '0';
+  const vertical = cssUnit(pxMatches[1]) || '0';
+  const blur = pxMatches[2] ? cssUnit(pxMatches[2]) : '0';
+  const spread = pxMatches[3] ? cssUnit(pxMatches[3]) : '0';
+  const color = colorMatch ? normalizeColor(colorMatch[0]) : 'rgba(0,0,0,0.15)';
+
+  return {
+    box_shadow_box_shadow_type: 'yes',
+    box_shadow_box_shadow: {
+      horizontal,
+      vertical,
+      blur,
+      spread,
+      color,
+      position: 'outline',
+    },
+  };
+}
+
+function parseBorderSettings(computedStyles: Record<string, string>): Record<string, any> {
+  const borderStyle = computedStyles.borderStyle;
+  const borderColor = normalizeColor(computedStyles.borderColor || computedStyles.borderTopColor);
+  const borderWidth = cssUnit(computedStyles.borderWidth || computedStyles.borderTopWidth);
+  const borderRadius = cssUnit(computedStyles.borderRadius || computedStyles.borderTopLeftRadius);
+
+  const res: Record<string, any> = {};
+
+  if (borderStyle && borderStyle !== 'none') {
+    res.border_border = borderStyle;
+    if (borderWidth) {
+      res.border_width = { unit: 'px', top: borderWidth, right: borderWidth, bottom: borderWidth, left: borderWidth, isLinked: true };
+    }
+    if (borderColor) {
+      res.border_color = borderColor;
+    }
+  }
+
+  if (borderRadius && borderRadius !== '0') {
+    res.border_radius = { unit: 'px', top: borderRadius, right: borderRadius, bottom: borderRadius, left: borderRadius, isLinked: true };
+  }
+
+  return res;
+}
+
+function parseFlexboxSettings(computedStyles: Record<string, string>): Record<string, any> {
+  const flexDir = computedStyles.flexDirection;
+  const flexWrap = computedStyles.flexWrap;
+  const justify = computedStyles.justifyContent;
+  const align = computedStyles.alignItems;
+  const gapVal = cssUnit(computedStyles.gap || computedStyles.rowGap || computedStyles.columnGap);
+
+  const flexSettings: Record<string, any> = {
+    flex_direction: flexDir || 'row',
+    flex_wrap: flexWrap === 'wrap' ? 'wrap' : 'nowrap',
+  };
+
+  if (justify) {
+    if (justify.includes('flex-start') || justify === 'start') flexSettings.justify_content = 'start';
+    else if (justify.includes('flex-end') || justify === 'end') flexSettings.justify_content = 'end';
+    else if (justify === 'center') flexSettings.justify_content = 'center';
+    else if (justify === 'space-between') flexSettings.justify_content = 'space-between';
+    else if (justify === 'space-around') flexSettings.justify_content = 'space-around';
+    else if (justify === 'space-evenly') flexSettings.justify_content = 'space-evenly';
+  }
+
+  if (align) {
+    if (align.includes('flex-start') || align === 'start') flexSettings.align_items = 'start';
+    else if (align.includes('flex-end') || align === 'end') flexSettings.align_items = 'end';
+    else if (align === 'center') flexSettings.align_items = 'center';
+    else if (align === 'baseline') flexSettings.align_items = 'baseline';
+    else if (align === 'stretch') flexSettings.align_items = 'stretch';
+  }
+
+  if (gapVal) {
+    flexSettings.gap = { unit: 'px', size: gapVal };
+  }
+
+  return flexSettings;
+}
+
+function parseGridSettings(computedStyles: Record<string, string>): Record<string, any> {
+  const cols = computedStyles.gridTemplateColumns || 'repeat(3, 1fr)';
+  const rows = computedStyles.gridTemplateRows || 'auto';
+  const colGap = cssUnit(computedStyles.columnGap || computedStyles.gap) || '10';
+  const rowGap = cssUnit(computedStyles.rowGap || computedStyles.gap) || '10';
+
+  return {
+    grid_columns_grid: { unit: 'custom', size: cols },
+    grid_rows_grid: { unit: 'custom', size: rows },
+    grid_gap: { unit: 'px', column: colGap, row: rowGap, isLinked: true },
+  };
+}
+
+function parseHoverSettings(computedStyles: Record<string, string>): Record<string, any> {
+  const hoverBg = normalizeColor(computedStyles.hoverBackgroundColor);
+  const hoverColor = normalizeColor(computedStyles.hoverColor);
+  const hoverBorderColor = normalizeColor(computedStyles.hoverBorderColor);
+  const transitionDur = cssUnit(computedStyles.transitionDuration);
+  const hoverAnim = computedStyles.hoverAnimation || (transitionDur ? 'grow' : '');
+
+  const hoverRes: Record<string, any> = {};
+  if (hoverBg) hoverRes.background_hover_color = hoverBg;
+  if (hoverColor) hoverRes.button_hover_color = hoverColor;
+  if (hoverBorderColor) hoverRes.border_hover_color = hoverBorderColor;
+  if (hoverAnim) hoverRes.hover_animation = hoverAnim;
+  if (transitionDur) hoverRes.hover_transition = { unit: 's', size: transitionDur };
+
+  return hoverRes;
+}
+
+// ─────────────────────────────────────────────
 // Widget Builders
 // ─────────────────────────────────────────────
 
 function buildHeadingWidget(data: ElementData): ElementorWidget {
   const tag = data.tagName.toLowerCase();
   const headingSize = { h1: 'xxl', h2: 'xl', h3: 'large', h4: 'medium', h5: 'small', h6: 'small' };
+  const typography = parseTypographySettings(data.computedStyles);
+  const boxShadow = parseBoxShadowSettings(data.computedStyles.boxShadow);
+
   return {
     id: uid(),
     elType: 'widget',
@@ -111,10 +332,9 @@ function buildHeadingWidget(data: ElementData): ElementorWidget {
       header_size: headingSize[tag as keyof typeof headingSize] || 'h2',
       align: data.computedStyles.textAlign || 'left',
       title_color: normalizeColor(data.computedStyles.color),
-      typography_typography: 'custom',
-      typography_font_size: { unit: 'px', size: cssUnit(data.computedStyles.fontSize) || '24' },
-      typography_font_weight: data.computedStyles.fontWeight || '600',
       _css_classes: data.className || '',
+      ...typography,
+      ...boxShadow,
     }),
     elements: [],
   };
@@ -122,6 +342,8 @@ function buildHeadingWidget(data: ElementData): ElementorWidget {
 
 function buildTextWidget(data: ElementData): ElementorWidget {
   const cleanHTML = processHTMLUrls(data.innerHTML || `<p>${data.innerText}</p>`);
+  const typography = parseTypographySettings(data.computedStyles);
+
   return {
     id: uid(),
     elType: 'widget',
@@ -129,10 +351,8 @@ function buildTextWidget(data: ElementData): ElementorWidget {
     settings: cleanSettings({
       editor: cleanHTML,
       text_color: normalizeColor(data.computedStyles.color),
-      typography_typography: 'custom',
-      typography_font_size: { unit: 'px', size: cssUnit(data.computedStyles.fontSize) || '16' },
-      typography_font_weight: data.computedStyles.fontWeight || '400',
       _css_classes: data.className || '',
+      ...typography,
     }),
     elements: [],
   };
@@ -141,6 +361,11 @@ function buildTextWidget(data: ElementData): ElementorWidget {
 function buildButtonWidget(data: ElementData): ElementorWidget {
   const rawHref = data.attributes['href'] || '#';
   const href = makeAbsoluteURL(rawHref);
+  const typography = parseTypographySettings(data.computedStyles);
+  const borders = parseBorderSettings(data.computedStyles);
+  const boxShadow = parseBoxShadowSettings(data.computedStyles.boxShadow);
+  const hovers = parseHoverSettings(data.computedStyles);
+
   return {
     id: uid(),
     elType: 'widget',
@@ -150,11 +375,13 @@ function buildButtonWidget(data: ElementData): ElementorWidget {
       link: { url: href, is_external: href.startsWith('http') ? 'yes' : '', nofollow: '' },
       align: 'center',
       button_type: 'default',
-      border_radius: { unit: 'px', top: cssUnit(data.computedStyles.borderRadius) || '4', right: cssUnit(data.computedStyles.borderRadius) || '4', bottom: cssUnit(data.computedStyles.borderRadius) || '4', left: cssUnit(data.computedStyles.borderRadius) || '4', isLinked: true },
       background_color: normalizeColor(data.computedStyles.backgroundColor) || '#a855f7',
       button_text_color: normalizeColor(data.computedStyles.color) || '#ffffff',
-      typography_font_size: { unit: 'px', size: cssUnit(data.computedStyles.fontSize) || '14' },
       _css_classes: data.className || '',
+      ...typography,
+      ...borders,
+      ...boxShadow,
+      ...hovers,
     }),
     elements: [],
   };
@@ -221,6 +448,9 @@ function buildIconBoxWidget(data: ElementData): ElementorWidget {
 }
 
 function buildNavMenuWidget(data: ElementData): ElementorWidget {
+  const typography = parseTypographySettings(data.computedStyles);
+  const hovers = parseHoverSettings(data.computedStyles);
+
   return {
     id: uid(),
     elType: 'widget',
@@ -230,9 +460,9 @@ function buildNavMenuWidget(data: ElementData): ElementorWidget {
       align_items: 'center',
       pointer: 'underline',
       _css_classes: data.className || '',
-      typography_font_size: { unit: 'px', size: cssUnit(data.computedStyles.fontSize) || '16' },
-      typography_font_weight: data.computedStyles.fontWeight || '500',
       color: normalizeColor(data.computedStyles.color) || '#1e293b',
+      ...typography,
+      ...hovers,
     }),
     elements: [],
   };
@@ -380,6 +610,8 @@ function buildColumn(widgets: ElementorWidget[], widthPercent = 100): ElementorW
 function buildSection(columns: ElementorWidget[], data: ElementData): ElementorWidget {
   const isFlexDisplay = data.computedStyles.display?.includes('flex');
   const bgColor = normalizeColor(data.computedStyles.backgroundColor);
+  const gradientSettings = parseCSSGradient(data.computedStyles.backgroundImage);
+  const flexSettings = isFlexDisplay ? parseFlexboxSettings(data.computedStyles) : {};
   const containerTitle = getSemanticContainerTitle(data);
 
   return {
@@ -391,8 +623,10 @@ function buildSection(columns: ElementorWidget[], data: ElementData): ElementorW
       layout: isFlexDisplay ? 'flexbox' : 'default',
       gap: 'default',
       structure: `${columns.length}0`,
-      background_background: bgColor ? 'classic' : '',
+      background_background: gradientSettings.background_background || (bgColor ? 'classic' : ''),
       background_color: bgColor,
+      ...gradientSettings,
+      ...flexSettings,
       padding: {
         unit: 'px',
         top: cssUnit(data.computedStyles.paddingTop) || '20',
@@ -412,17 +646,30 @@ function buildSection(columns: ElementorWidget[], data: ElementData): ElementorW
 // ─────────────────────────────────────────────
 
 function buildAtomicBlock(childWidgets: ElementorWidget[], data: ElementData): ElementorWidget {
-  const isFlex = data.computedStyles.display?.includes('flex') || data.computedStyles.display?.includes('grid');
+  const isGrid = data.computedStyles.display?.includes('grid');
+  const isFlex = data.computedStyles.display?.includes('flex');
   const containerTitle = getSemanticContainerTitle(data);
+
+  const elType = isGrid ? 'e-grid' : (isFlex ? 'e-flexbox' : 'e-div-block');
+
+  const gradientSettings = parseCSSGradient(data.computedStyles.backgroundImage);
+  const flexSettings = isFlex ? parseFlexboxSettings(data.computedStyles) : {};
+  const gridSettings = isGrid ? parseGridSettings(data.computedStyles) : {};
+  const borderSettings = parseBorderSettings(data.computedStyles);
+  const boxShadowSettings = parseBoxShadowSettings(data.computedStyles.boxShadow);
+  const hoverSettings = parseHoverSettings(data.computedStyles);
+
+  const bgColor = normalizeColor(data.computedStyles.backgroundColor);
+
   return {
     id: uid(),
     version: '0.0',
-    elType: isFlex ? 'e-flexbox' : 'e-div-block',
+    elType,
     isInner: false,
     settings: cleanSettings({
       _title: containerTitle,
       _css_classes: data.className || '',
-      background_color: normalizeColor(data.computedStyles.backgroundColor),
+      background_color: bgColor,
       padding: {
         unit: 'px',
         top: cssUnit(data.computedStyles.paddingTop) || '0',
@@ -431,6 +678,12 @@ function buildAtomicBlock(childWidgets: ElementorWidget[], data: ElementData): E
         left: cssUnit(data.computedStyles.paddingLeft) || '0',
         isLinked: false,
       },
+      ...gradientSettings,
+      ...flexSettings,
+      ...gridSettings,
+      ...borderSettings,
+      ...boxShadowSettings,
+      ...hoverSettings,
     }),
     editor_settings: {
       title: containerTitle,
