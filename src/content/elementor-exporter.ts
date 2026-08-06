@@ -3,6 +3,7 @@ import { showCopyToast } from './toast';
 import { tryMapToNativeWidget } from './widget-mapper';
 export { extractPageGlobalPalette, extractGlobalPaletteFromElements } from './palette-extractor';
 export { tryMapToNativeWidget } from './widget-mapper';
+export { exportFullPageTemplate, generateFullPageTemplateJSON, downloadTemplateJSON, getPageSectionSummary } from './page-exporter';
 
 // ─────────────────────────────────────────────
 // Elementor Data Structures

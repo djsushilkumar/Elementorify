@@ -290,3 +290,23 @@ selector{${oe}}`}const wt=["strong","b","em","i","u","span","s","strike","del","
             border-bottom-left-radius: 4px !important;
           }
         `})]}):null}const XE=document.createElement("div");XE.id="html-to-elementor-content-root",document.body.append(XE);const QE=document.createElement("div");QE.id="shadow-root",XE.appendChild(QE),SO(QE).render(He.jsx(x_e,{}))})();
+
+import { exportFullPageTemplate, getPageSectionSummary } from './page-exporter';
+
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+  chrome.runtime.onMessage.addListener((message: any, _sender: any, sendResponse: any) => {
+    if (message.action === 'exportFullPageTemplate') {
+      exportFullPageTemplate(message.exportVersion || 'v4', message.mode || 'download').then(result => {
+        chrome.runtime.sendMessage({ action: 'fullPageExportCompleted', result }).catch(() => {});
+        sendResponse?.({ status: 'ok', result });
+      });
+      return true;
+    }
+    if (message.action === 'getPageSectionSummary') {
+      const sections = getPageSectionSummary();
+      chrome.runtime.sendMessage({ action: 'pageSectionSummaryExtracted', count: sections.length, sections }).catch(() => {});
+      sendResponse?.({ status: 'ok', count: sections.length, sections });
+      return true;
+    }
+  });
+}

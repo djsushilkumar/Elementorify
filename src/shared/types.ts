@@ -102,6 +102,27 @@ export interface ElementorExport {
 
 export type ExportVersion = 'v3' | 'v4';
 
+export interface PageSectionInfo {
+  id: string;
+  tagName: string;
+  className: string;
+  title: string;
+  rect: {
+    width: number;
+    height: number;
+    top: number;
+    left: number;
+  };
+}
+
+export interface FullPageExportResult {
+  title: string;
+  sectionCount: number;
+  exportVersion: ExportVersion;
+  downloaded: boolean;
+  jsonPayload: string;
+}
+
 export type ExtensionMessage =
   | { action: 'elementClicked'; data: ElementData }
   | { action: 'updatePopup'; data: ElementData }
@@ -110,9 +131,14 @@ export type ExtensionMessage =
   | { action: 'enableCaptureData'; tabId: number; exportVersion?: ExportVersion }
   | { action: 'extractGlobalPalette'; tabId: number }
   | { action: 'globalPaletteExtracted'; data: GlobalPaletteData }
+  | { action: 'exportFullPageTemplate'; tabId: number; exportVersion?: ExportVersion; mode?: 'download' | 'copy' }
+  | { action: 'fullPageExportCompleted'; result: FullPageExportResult }
+  | { action: 'getPageSectionSummary'; tabId: number }
+  | { action: 'pageSectionSummaryExtracted'; count: number; sections: PageSectionInfo[] }
   | { action: 'DEBUGGER_ATTACHED' }
   | { action: 'DEBUGGER_DETACHED' }
   | { action: 'VIEWPORT_CHANGED'; viewport: ViewportData; error?: boolean }
   | { action: 'VIEWPORT_RESTORED'; error?: boolean };
+
 
 

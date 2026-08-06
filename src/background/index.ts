@@ -101,6 +101,14 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, _sendR
   if (message.action === 'globalPaletteExtracted') {
     chrome.runtime.sendMessage({ action: 'globalPaletteExtracted', data: message.data }).catch(() => {});
   }
+
+  if (message.action === 'exportFullPageTemplate') {
+    chrome.tabs.sendMessage(message.tabId, message).catch(() => {});
+  }
+
+  if (message.action === 'getPageSectionSummary') {
+    chrome.tabs.sendMessage(message.tabId, message).catch(() => {});
+  }
 });
 
 function triggerInspectorOnActiveTab() {
