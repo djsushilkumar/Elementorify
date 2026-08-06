@@ -1,6 +1,8 @@
 import { ElementData, ExportVersion } from '../shared/types';
 import { showCopyToast } from './toast';
+import { tryMapToNativeWidget } from './widget-mapper';
 export { extractPageGlobalPalette, extractGlobalPaletteFromElements } from './palette-extractor';
+export { tryMapToNativeWidget } from './widget-mapper';
 
 // ─────────────────────────────────────────────
 // Elementor Data Structures
@@ -566,6 +568,9 @@ function getSemanticContainerTitle(data: ElementData): string {
 // ─────────────────────────────────────────────
 
 function buildWidget(data: ElementData): ElementorWidget {
+  const smartWidget = tryMapToNativeWidget(data);
+  if (smartWidget) return smartWidget;
+
   const tag = data.tagName.toUpperCase();
   const cls = (data.className || '').toLowerCase();
 

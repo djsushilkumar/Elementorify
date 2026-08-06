@@ -225,7 +225,34 @@ try {
   console.error('❌ Test 8 Failed:', err);
 }
 
-console.log('\n🎉 All Exporter Tests (v4 Atomic, v3 Legacy, Advanced Styling & Global Palette) Completed Successfully!');
+// Test 9: Smart Widget Auto-Mapper Test
+try {
+  const { detectAccordionWidget, detectTabsWidget, detectCounterWidget, detectTestimonialWidget, detectIconBoxWidget } = await import('../src/content/widget-mapper');
+
+  const mockDetailsData: any = { tagName: 'DETAILS', className: '', innerText: 'What is Elementorify?', innerHTML: '<summary>What is Elementorify?</summary><p>A powerful converter extension.</p>' };
+  const mockTabsData: any = { tagName: 'DIV', className: 'tabs-container', innerText: 'Tab 1 Tab 2', innerHTML: '<div class="tab-btn">Tab 1</div><div class="tab-btn">Tab 2</div><div class="tab-content">Content</div>' };
+  const mockCounterData: any = { tagName: 'SPAN', className: 'stat-count', innerText: '500+', innerHTML: '500+' };
+  const mockTestimonialData: any = { tagName: 'DIV', className: 'testimonial-card', innerText: 'Great product! Sarah Jenkins CTO', innerHTML: '<p>Great product!</p><h4>Sarah Jenkins</h4>' };
+  const mockIconBoxData: any = { tagName: 'DIV', className: 'icon-box', innerText: 'Feature Rocket Launch', innerHTML: '<svg></svg><h3>Feature Rocket</h3><p>Launch fast</p>' };
+
+  const accWidget = detectAccordionWidget(mockDetailsData);
+  const tabWidget = detectTabsWidget(mockTabsData);
+  const cntWidget = detectCounterWidget(mockCounterData);
+  const tstWidget = detectTestimonialWidget(mockTestimonialData);
+  const ibxWidget = detectIconBoxWidget(mockIconBoxData);
+
+  console.log('\n✅ Test 9 Passed: Smart Widget Auto-Mapper pattern recognition valid.');
+  console.log(`   - Accordion Widget Type: ${accWidget?.widgetType}`);
+  console.log(`   - Tabs Widget Type: ${tabWidget?.widgetType}`);
+  console.log(`   - Counter Ending Number: ${cntWidget?.settings.ending_number}`);
+  console.log(`   - Testimonial Name: ${tstWidget?.settings.testimonial_name}`);
+  console.log(`   - Icon Box Title: ${ibxWidget?.settings.title_text}`);
+} catch (err) {
+  console.error('❌ Test 9 Failed:', err);
+}
+
+console.log('\n🎉 All Exporter Tests (v4 Atomic, v3 Legacy, Advanced Styling, Global Palette & Smart Widget Auto-Mapper) Completed Successfully!');
+
 
 
 

@@ -79,6 +79,29 @@ export interface GlobalPaletteData {
   elementorKitPayload: Record<string, any>;
 }
 
+export interface ElementorWidget {
+  id: string;
+  version?: string;
+  elType: 'widget' | 'section' | 'column' | 'container' | 'e-div-block' | 'e-flexbox' | 'e-grid' | string;
+  isInner?: boolean;
+  widgetType?: string;
+  settings: Record<string, unknown>;
+  editor_settings?: Record<string, unknown>;
+  interactions?: unknown[];
+  styles?: unknown[];
+  elements: ElementorWidget[];
+}
+
+export interface ElementorExport {
+  version: string;
+  title: string;
+  type: string;
+  content: ElementorWidget[];
+  page_settings?: Record<string, unknown>;
+}
+
+export type ExportVersion = 'v3' | 'v4';
+
 export type ExtensionMessage =
   | { action: 'elementClicked'; data: ElementData }
   | { action: 'updatePopup'; data: ElementData }
@@ -91,4 +114,5 @@ export type ExtensionMessage =
   | { action: 'DEBUGGER_DETACHED' }
   | { action: 'VIEWPORT_CHANGED'; viewport: ViewportData; error?: boolean }
   | { action: 'VIEWPORT_RESTORED'; error?: boolean };
+
 
