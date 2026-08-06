@@ -1,6 +1,6 @@
 # Elementorify — HTML to Elementor Converter 🚀
 
-![Version](https://img.shields.io/badge/version-1.8.0-purple.svg)
+![Version](https://img.shields.io/badge/version-1.9.0-purple.svg)
 ![Chrome Extension](https://img.shields.io/badge/Chrome_Extension-Manifest_V3-cyan.svg)
 ![Elementor 4.0 Atomic](https://img.shields.io/badge/Elementor_v4-Atomic_Architecture-emerald.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)

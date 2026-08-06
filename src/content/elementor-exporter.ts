@@ -111,6 +111,60 @@ function cleanFontFamily(fontStr: string | undefined): string {
   return firstFont;
 }
 
+function buildGlobalBinding(color?: string, font?: string, colorPropKey = 'title_color'): Record<string, any> {
+  const globals: Record<string, string> = {};
+
+  if (color) {
+    const lower = color.toLowerCase();
+    if (lower.includes('15, 23, 42') || lower.includes('0f172a') || lower.includes('0, 0, 0') || lower.includes('black')) {
+      globals[colorPropKey] = 'globals/colors?id=primary';
+    } else if (lower.includes('168, 85, 247') || lower.includes('a855f7') || lower.includes('purple')) {
+      globals[colorPropKey] = 'globals/colors?id=accent';
+    } else if (lower.includes('6, 182, 212') || lower.includes('06b6d4') || lower.includes('cyan')) {
+      globals[colorPropKey] = 'globals/colors?id=secondary';
+    } else {
+      globals[colorPropKey] = 'globals/colors?id=text';
+    }
+  }
+
+  if (font) {
+    globals['typography_typography'] = 'globals/typography?id=primary';
+  }
+
+  return Object.keys(globals).length > 0 ? { __globals__: globals } : {};
+}
+
+function buildResponsiveSpacingSettings(computedStyles: Record<string, string>): Record<string, any> {
+  const pTop = cssUnit(computedStyles?.paddingTop) || '0';
+  const pRight = cssUnit(computedStyles?.paddingRight) || '0';
+  const pBottom = cssUnit(computedStyles?.paddingBottom) || '0';
+  const pLeft = cssUnit(computedStyles?.paddingLeft) || '0';
+
+  const mTop = cssUnit(computedStyles?.marginTop) || '0';
+  const mRight = cssUnit(computedStyles?.marginRight) || '0';
+  const mBottom = cssUnit(computedStyles?.marginBottom) || '0';
+  const mLeft = cssUnit(computedStyles?.marginLeft) || '0';
+
+  const pTopTab = String(Math.round((parseFloat(pTop) || 0) * 0.75));
+  const pRightTab = String(Math.round((parseFloat(pRight) || 0) * 0.75));
+  const pBottomTab = String(Math.round((parseFloat(pBottom) || 0) * 0.75));
+  const pLeftTab = String(Math.round((parseFloat(pLeft) || 0) * 0.75));
+
+  const pTopMob = String(Math.round((parseFloat(pTop) || 0) * 0.5));
+  const pRightMob = String(Math.round((parseFloat(pRight) || 0) * 0.5));
+  const pBottomMob = String(Math.round((parseFloat(pBottom) || 0) * 0.5));
+  const pLeftMob = String(Math.round((parseFloat(pLeft) || 0) * 0.5));
+
+  return {
+    padding: { unit: 'px', top: pTop, right: pRight, bottom: pBottom, left: pLeft, isLinked: false },
+    padding_tablet: { unit: 'px', top: pTopTab, right: pRightTab, bottom: pBottomTab, left: pLeftTab, isLinked: false },
+    padding_mobile: { unit: 'px', top: pTopMob, right: pRightMob, bottom: pBottomMob, left: pLeftMob, isLinked: false },
+    margin: { unit: 'px', top: mTop, right: mRight, bottom: mBottom, left: mLeft, isLinked: false },
+    margin_tablet: { unit: 'px', top: String(Math.round((parseFloat(mTop) || 0) * 0.75)), right: String(Math.round((parseFloat(mRight) || 0) * 0.75)), bottom: String(Math.round((parseFloat(mBottom) || 0) * 0.75)), left: String(Math.round((parseFloat(mLeft) || 0) * 0.75)), isLinked: false },
+    margin_mobile: { unit: 'px', top: String(Math.round((parseFloat(mTop) || 0) * 0.5)), right: String(Math.round((parseFloat(mRight) || 0) * 0.5)), bottom: String(Math.round((parseFloat(mBottom) || 0) * 0.5)), left: String(Math.round((parseFloat(mLeft) || 0) * 0.5)), isLinked: false },
+  };
+}
+
 function parseTypographySettings(computedStyles: Record<string, string>): Record<string, any> {
   const fontFamily = cleanFontFamily(computedStyles.fontFamily);
   const fontSize = cssUnit(computedStyles.fontSize);
@@ -126,7 +180,15 @@ function parseTypographySettings(computedStyles: Record<string, string>): Record
   };
 
   if (fontFamily) typography.typography_font_family = fontFamily;
-  if (fontSize) typography.typography_font_size = { unit: 'px', size: fontSize };
+  if (fontSize) {
+    const numSize = parseFloat(fontSize) || 16;
+    const tabSize = String(Math.max(12, Math.round(numSize * 0.8)));
+    const mobSize = String(Math.max(11, Math.round(numSize * 0.65)));
+
+    typography.typography_font_size = { unit: 'px', size: fontSize };
+    typography.typography_font_size_tablet = { unit: 'px', size: tabSize };
+    typography.typography_font_size_mobile = { unit: 'px', size: mobSize };
+  }
   if (fontWeight && fontWeight !== 'normal') typography.typography_font_weight = fontWeight;
 
   if (lineHeight && lineHeight !== 'normal') {
@@ -324,6 +386,8 @@ function buildHeadingWidget(data: ElementData): ElementorWidget {
   const headingSize = { h1: 'xxl', h2: 'xl', h3: 'large', h4: 'medium', h5: 'small', h6: 'small' };
   const typography = parseTypographySettings(data.computedStyles);
   const boxShadow = parseBoxShadowSettings(data.computedStyles.boxShadow);
+  const titleColor = normalizeColor(data.computedStyles.color);
+  const globals = buildGlobalBinding(titleColor, data.computedStyles.fontFamily, 'title_color');
 
   return {
     id: uid(),
@@ -333,10 +397,11 @@ function buildHeadingWidget(data: ElementData): ElementorWidget {
       title: data.innerText || 'Heading',
       header_size: headingSize[tag as keyof typeof headingSize] || 'h2',
       align: data.computedStyles.textAlign || 'left',
-      title_color: normalizeColor(data.computedStyles.color),
+      title_color: titleColor,
       _css_classes: data.className || '',
       ...typography,
       ...boxShadow,
+      ...globals,
     }),
     elements: [],
   };
@@ -345,6 +410,8 @@ function buildHeadingWidget(data: ElementData): ElementorWidget {
 function buildTextWidget(data: ElementData): ElementorWidget {
   const cleanHTML = processHTMLUrls(data.innerHTML || `<p>${data.innerText}</p>`);
   const typography = parseTypographySettings(data.computedStyles);
+  const textColor = normalizeColor(data.computedStyles.color);
+  const globals = buildGlobalBinding(textColor, data.computedStyles.fontFamily, 'text_color');
 
   return {
     id: uid(),
@@ -352,9 +419,10 @@ function buildTextWidget(data: ElementData): ElementorWidget {
     widgetType: 'text-editor',
     settings: cleanSettings({
       editor: cleanHTML,
-      text_color: normalizeColor(data.computedStyles.color),
+      text_color: textColor,
       _css_classes: data.className || '',
       ...typography,
+      ...globals,
     }),
     elements: [],
   };
@@ -618,6 +686,7 @@ function buildSection(columns: ElementorWidget[], data: ElementData): ElementorW
   const gradientSettings = parseCSSGradient(data.computedStyles.backgroundImage);
   const flexSettings = isFlexDisplay ? parseFlexboxSettings(data.computedStyles) : {};
   const containerTitle = getSemanticContainerTitle(data);
+  const spacingSettings = buildResponsiveSpacingSettings(data.computedStyles);
 
   return {
     id: uid(),
@@ -632,14 +701,7 @@ function buildSection(columns: ElementorWidget[], data: ElementData): ElementorW
       background_color: bgColor,
       ...gradientSettings,
       ...flexSettings,
-      padding: {
-        unit: 'px',
-        top: cssUnit(data.computedStyles.paddingTop) || '20',
-        right: cssUnit(data.computedStyles.paddingRight) || '20',
-        bottom: cssUnit(data.computedStyles.paddingBottom) || '20',
-        left: cssUnit(data.computedStyles.paddingLeft) || '20',
-        isLinked: false,
-      },
+      ...spacingSettings,
       content_width: { unit: 'px', size: Math.min(data.rect.width || 1200, 1200) },
     }),
     elements: columns,
@@ -663,6 +725,7 @@ function buildAtomicBlock(childWidgets: ElementorWidget[], data: ElementData): E
   const borderSettings = parseBorderSettings(data.computedStyles);
   const boxShadowSettings = parseBoxShadowSettings(data.computedStyles.boxShadow);
   const hoverSettings = parseHoverSettings(data.computedStyles);
+  const spacingSettings = buildResponsiveSpacingSettings(data.computedStyles);
 
   const bgColor = normalizeColor(data.computedStyles.backgroundColor);
 
@@ -675,14 +738,7 @@ function buildAtomicBlock(childWidgets: ElementorWidget[], data: ElementData): E
       _title: containerTitle,
       _css_classes: data.className || '',
       background_color: bgColor,
-      padding: {
-        unit: 'px',
-        top: cssUnit(data.computedStyles.paddingTop) || '0',
-        right: cssUnit(data.computedStyles.paddingRight) || '0',
-        bottom: cssUnit(data.computedStyles.paddingBottom) || '0',
-        left: cssUnit(data.computedStyles.paddingLeft) || '0',
-        isLinked: false,
-      },
+      ...spacingSettings,
       ...gradientSettings,
       ...flexSettings,
       ...gridSettings,

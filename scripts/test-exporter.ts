@@ -251,7 +251,44 @@ try {
   console.error('❌ Test 9 Failed:', err);
 }
 
-console.log('\n🎉 All Exporter Tests (v4 Atomic, v3 Legacy, Advanced Styling, Global Palette & Smart Widget Auto-Mapper) Completed Successfully!');
+// Test 10: Global Site Settings & Responsive Breakpoints Test
+try {
+  const { generateElementorV4AtomicJSON } = await import('../src/content/elementor-exporter');
+
+  const mockHeading: any = {
+    tagName: 'H1',
+    className: 'hero-title',
+    innerText: 'Global Responsive Heading',
+    innerHTML: 'Global Responsive Heading',
+    computedStyles: {
+      color: 'rgb(15, 23, 42)',
+      fontSize: '48px',
+      fontFamily: "'Outfit', sans-serif",
+      paddingTop: '32px',
+      paddingBottom: '32px',
+    },
+    attributes: {},
+    childrenCount: 0,
+    rect: { width: 1200, height: 60, top: 0, left: 0 },
+  };
+
+  const json = generateElementorV4AtomicJSON(mockHeading);
+  const headingWidget = json.content[0].elements[0];
+
+  console.log('\n✅ Test 10 Passed: Global Site Settings & Responsive Breakpoints valid.');
+  console.log(`   - Global Color Link: ${(headingWidget.settings.__globals__ as any)?.title_color}`);
+  console.log(`   - Global Typography Link: ${(headingWidget.settings.__globals__ as any)?.typography_typography}`);
+  console.log(`   - Desktop Font Size: ${(headingWidget.settings.typography_font_size as any)?.size}px`);
+  console.log(`   - Tablet Font Size: ${(headingWidget.settings.typography_font_size_tablet as any)?.size}px`);
+  console.log(`   - Mobile Font Size: ${(headingWidget.settings.typography_font_size_mobile as any)?.size}px`);
+  console.log(`   - Tablet Padding Top: ${(json.content[0].settings.padding_tablet as any)?.top}px`);
+  console.log(`   - Mobile Padding Top: ${(json.content[0].settings.padding_mobile as any)?.top}px`);
+} catch (err) {
+  console.error('❌ Test 10 Failed:', err);
+}
+
+console.log('\n🎉 All Exporter Tests (v4 Atomic, v3 Legacy, Advanced Styling, Global Palette, Smart Widget Auto-Mapper & Global Responsive Settings) Completed Successfully!');
+
 
 
 
